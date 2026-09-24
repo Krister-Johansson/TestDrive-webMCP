@@ -173,3 +173,7 @@ drizzle            SQL migrations, applied on startup
 tests              shared test setup and the document.modelContext stub
 e2e                Playwright specs
 ```
+
+## Contributing
+
+`main` is protected. Work on a branch, open a pull request, and merge once the `checks` and `e2e` workflows pass and every review comment is resolved. Direct pushes to `main` are rejected, including for admins.
