@@ -74,6 +74,14 @@ describe("review fixes", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("opens on the first upcoming day with free slots when today is sold out or over", () => {
+    const car = service.findCar("Norra Fjell")!;
+    for (const slot of service.listAvailableSlots({ carId: car.id, date: "2026-10-01" })) {
+      service.createBooking({ slotId: slot.id, customerName: "Full" });
+    }
+    expect(loadBookingView(service, car.id, undefined)?.selected).toBe("2026-10-02");
+  });
+
   it("falls back to the default day for an impossible calendar date", () => {
     const car = service.findCar("Norra Fjell")!;
     const view = loadBookingView(service, car.id, "2026-02-30");

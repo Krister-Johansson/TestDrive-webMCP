@@ -20,7 +20,10 @@ export type AppToolExecute = (input: Record<string, unknown>) => Promise<string 
  * header toggle: the tool is only exposed while WebMCP is on and the browser has it.
  */
 export function useAppTool(def: ToolDef, inputSchema: ObjectSchema, execute: AppToolExecute, deps: unknown[] = []) {
-  const { active, track, untrack } = useWebMcp();
+  const {
+    state: { active },
+    actions: { track, untrack },
+  } = useWebMcp();
 
   useWebMCP(
     {

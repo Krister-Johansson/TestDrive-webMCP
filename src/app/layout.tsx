@@ -24,11 +24,16 @@ export default function RootLayout({ children, modal }: LayoutProps<"/">) {
         <ThemeProvider>
           <LiveProvider>
             <WebMcpProvider>
-              <SiteHeader tools={<WebMcpControls />} />
+              <SiteHeader>
+                <WebMcpControls />
+              </SiteHeader>
               <GlobalToolsMount />
               <div className="flex-1">{children}</div>
               {modal}
-              <Toaster position="bottom-right" richColors closeButton />
+              {/* Always-mounted, named wrapper so toasts are not captured in the root transition. */}
+              <div style={{ viewTransitionName: "toaster" }} className="pointer-events-none fixed inset-0 z-50">
+                <Toaster position="bottom-right" richColors closeButton className="pointer-events-auto" />
+              </div>
             </WebMcpProvider>
           </LiveProvider>
         </ThemeProvider>

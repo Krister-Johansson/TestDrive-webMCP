@@ -228,11 +228,13 @@ export function createBookingService(db: Db, bus: EventBus, options: BookingServ
   function listBrands(): BrandTree[] {
     const brandRows = db.select().from(brands).orderBy(asc(brands.name)).all();
     const modelRows = db.select().from(models).orderBy(asc(models.name)).all();
-    return brandRows.map((brand) => ({
-      id: brand.id,
-      name: brand.name,
-      models: modelRows.filter((model) => model.brandId === brand.id).map((model) => ({ id: model.id, name: model.name })),
-    }));
+    const byBrand = new Map<string, { id: string; name: string }[]>();
+    for (const model of modelRows) {
+      const list = byBrand.get(model.brandId) ?? [];
+      list.push({ id: model.id, name: model.name });
+      byBrand.set(model.brandId, list);
+    }
+    return brandRows.map((brand) => ({ id: brand.id, name: brand.name, models: byBrand.get(brand.id) ?? [] }));
   }
 
   function findBrand(name: string): Brand | null {
@@ -323,9 +325,9 @@ export function createBookingService(db: Db, bus: EventBus, options: BookingServ
       const counts = new Map<string, number>();
       for (const car of rows) counts.set(pick(car), (counts.get(pick(car)) ?? 0) + 1);
       const values = [...counts.entries()].map(([value, count]) => ({ value, count }));
-      return order
-        ? values.sort((a, b) => order.indexOf(a.value) - order.indexOf(b.value))
-        : values.sort((a, b) => a.value.localeCompare(b.value));
+      if (!order) return values.sort((a, b) => a.value.localeCompare(b.value));
+      const rank = new Map(order.map((value, index) => [value, index]));
+      return values.sort((a, b) => (rank.get(a.value) ?? 0) - (rank.get(b.value) ?? 0));
     };
     const others = without();
     const brandRows = without("brand", "model");

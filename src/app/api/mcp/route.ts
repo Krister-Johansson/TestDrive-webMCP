@@ -2,8 +2,6 @@ import { createMcpHandler } from "@modelcontextprotocol/server";
 import { createTestDriveServer } from "@/mcp/server";
 import { getBookingService } from "@/lib/service";
 
-export const dynamic = "force-dynamic";
-
 declare global {
   var __testdriveMcpHandler: ReturnType<typeof createMcpHandler> | undefined;
 }

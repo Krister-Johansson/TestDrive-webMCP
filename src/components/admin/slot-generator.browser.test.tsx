@@ -4,8 +4,9 @@ import { page } from "vitest/browser";
 import { SlotGenerator } from "./slot-generator";
 
 const cars = [
-  { id: "c1", label: "Norra Fjell" },
-  { id: "c2", label: "Aldo Sera" },
+  { id: "c1", brand: "Norra", model: "Fjell", active: true },
+  { id: "c2", brand: "Aldo", model: "Sera", active: true },
+  { id: "c3", brand: "Old", model: "Timer", active: false },
 ];
 
 test("previews how many slots will be created and submits", async () => {

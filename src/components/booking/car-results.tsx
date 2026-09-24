@@ -1,51 +1,34 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, ViewTransition } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Car } from "@/db/schema";
+import { RESULTS_VIEW_COOKIE, type ResultsView } from "@/lib/results-view";
 import { CarGrid } from "./car-grid";
 import { CarTable } from "./car-table";
 
-export type ResultsView = "cards" | "table";
-export const RESULTS_VIEW_KEY = "testdrive.results.view";
+export type { ResultsView };
 
-const listeners = new Set<() => void>();
-function readView(): ResultsView {
-  try {
-    return localStorage.getItem(RESULTS_VIEW_KEY) === "table" ? "table" : "cards";
-  } catch {
-    return "cards";
-  }
-}
-function writeView(view: ResultsView) {
-  try {
-    localStorage.setItem(RESULTS_VIEW_KEY, view);
-  } catch {
-    // ignore
-  }
-  listeners.forEach((listener) => listener());
-}
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-export function useResultsView(): [ResultsView, (view: ResultsView) => void] {
-  const view = useSyncExternalStore(subscribe, readView, () => "cards" as const);
-  return [view, writeView];
-}
-
-/** Cards or table toggle for the results toolbar. */
-export function ResultsViewToggle() {
-  const [view, setView] = useResultsView();
+/**
+ * Cards or table. The choice is a cookie read on the server, so the first paint already
+ * shows the right layout; changing it refreshes the page inside a transition.
+ */
+export function ResultsViewToggle({ view }: { view: ResultsView }) {
+  const router = useRouter();
   return (
     <ToggleGroup
       aria-label="View"
       variant="outline"
       size="sm"
       value={[view]}
-      onValueChange={(value) => value[0] && setView(value[0] as ResultsView)}
+      onValueChange={(value) => {
+        const next = value[0] as ResultsView | undefined;
+        if (!next || next === view) return;
+        document.cookie = `${RESULTS_VIEW_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+        startTransition(() => router.refresh());
+      }}
     >
       <ToggleGroupItem value="cards" aria-label="Cards">
         <LayoutGrid aria-hidden="true" />
@@ -57,8 +40,10 @@ export function ResultsViewToggle() {
   );
 }
 
-export function CarResults({ cars, query = "" }: { cars: Car[]; query?: string }) {
-  const [view] = useResultsView();
-  if (cars.length === 0 || view === "cards") return <CarGrid cars={cars} query={query} />;
-  return <CarTable cars={cars} query={query} />;
+export function CarResults({ cars, view, query = "" }: { cars: Car[]; view: ResultsView; query?: string }) {
+  return (
+    <ViewTransition>
+      {cars.length === 0 || view === "cards" ? <CarGrid cars={cars} query={query} /> : <CarTable cars={cars} query={query} />}
+    </ViewTransition>
+  );
 }

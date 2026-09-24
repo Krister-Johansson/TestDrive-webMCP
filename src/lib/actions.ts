@@ -31,8 +31,13 @@ function run<T>(fn: () => T): ActionResult<T> {
   }
 }
 
-function revalidateAll() {
-  revalidatePath("/", "layout");
+/** Invalidate only the routes that render the changed data. */
+function revalidateFor(scope: { carId?: string; bookingId?: string; fleet?: boolean } = {}) {
+  revalidatePath("/");
+  revalidatePath("/admin");
+  if (scope.fleet) revalidatePath("/book/[carId]", "page");
+  if (scope.carId) revalidatePath(`/book/${scope.carId}`);
+  if (scope.bookingId) revalidatePath(`/bookings/${scope.bookingId}`);
 }
 
 export async function findCarsAction(filters: Record<string, unknown>): Promise<ActionResult<Car[]>> {
@@ -61,7 +66,7 @@ export async function createBookingAction(input: NewBooking): Promise<ActionResu
     const booking = service.createBooking(input);
     return service.getBooking(booking.id)!;
   });
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ carId: result.data.car.id, bookingId: result.data.id });
   return result;
 }
 
@@ -71,7 +76,7 @@ export async function cancelBookingAction(bookingId: string): Promise<ActionResu
     service.cancelBooking(bookingId);
     return service.getBooking(bookingId)!;
   });
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ carId: result.data.car.id, bookingId });
   return result;
 }
 
@@ -94,31 +99,31 @@ export async function addModelAction(brandName: string, modelName: string): Prom
     const { brandId, modelId } = getBookingService().addModel(brandName, modelName);
     return { brandId, modelId };
   });
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ fleet: true });
   return result;
 }
 
 export async function createBrandAction(name: string): Promise<ActionResult<Brand>> {
   const result = run(() => getBookingService().createBrand(name));
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ fleet: true });
   return result;
 }
 
 export async function createModelAction(brandId: string, name: string): Promise<ActionResult<Model>> {
   const result = run(() => getBookingService().createModel(brandId, name));
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ fleet: true });
   return result;
 }
 
 export async function createCarAction(input: NewCar): Promise<ActionResult<Car>> {
   const result = run(() => getBookingService().createCar(input));
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ fleet: true });
   return result;
 }
 
 export async function updateCarAction(id: string, patch: CarPatch): Promise<ActionResult<Car>> {
   const result = run(() => getBookingService().updateCar(id, patch));
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ carId: id });
   return result;
 }
 
@@ -132,7 +137,7 @@ export async function generateSlotsAction(
     const created = service.generateSlots({ ...input, carId: car.id });
     return { car, count: created.length };
   });
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ carId: result.data.car.id });
   return result;
 }
 
@@ -141,6 +146,6 @@ export async function deleteSlotAction(slotId: string): Promise<ActionResult<nul
     getBookingService().deleteSlot(slotId);
     return null;
   });
-  if (result.ok) revalidateAll();
+  if (result.ok) revalidateFor({ fleet: true });
   return result;
 }

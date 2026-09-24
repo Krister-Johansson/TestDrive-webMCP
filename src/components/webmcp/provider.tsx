@@ -1,21 +1,24 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-
-import { WEBMCP_STORAGE_KEY } from "@/lib/webmcp-links";
+import { createContext, use, useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 
 export type WebMcpSupport = "unknown" | "native" | "unavailable";
 
-type WebMcpContextValue = {
+export type WebMcpState = {
   support: WebMcpSupport;
   enabled: boolean;
-  /** True when tools should be registered: the user turned WebMCP on and the browser has it. */
+  /** True when tools should be registered: the toggle is on and the browser has WebMCP. */
   active: boolean;
-  setEnabled: (enabled: boolean) => void;
   registeredTools: string[];
+};
+
+export type WebMcpActions = {
+  setEnabled: (enabled: boolean) => void;
   track: (name: string) => void;
   untrack: (name: string) => void;
 };
+
+type WebMcpContextValue = { state: WebMcpState; actions: WebMcpActions };
 
 const WebMcpContext = createContext<WebMcpContextValue | null>(null);
 
@@ -24,44 +27,17 @@ function detectModelContext(): WebMcpSupport {
   return document.modelContext ? "native" : "unavailable";
 }
 
-// The toggle lives in localStorage so it survives reloads. A tiny external store keeps
-// reads hydration-safe: the server snapshot is always "off".
-const enabledListeners = new Set<() => void>();
-
-function readEnabled(): boolean {
-  try {
-    return localStorage.getItem(WEBMCP_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function writeEnabled(next: boolean) {
-  try {
-    localStorage.setItem(WEBMCP_STORAGE_KEY, String(next));
-  } catch {
-    // storage can be unavailable in private windows
-  }
-  enabledListeners.forEach((listener) => listener());
-}
-
-function subscribeEnabled(listener: () => void) {
-  enabledListeners.add(listener);
-  window.addEventListener("storage", listener);
-  return () => {
-    enabledListeners.delete(listener);
-    window.removeEventListener("storage", listener);
-  };
-}
-
 const subscribeNever = () => () => {};
 
-export function WebMcpProvider({ children }: { children: ReactNode }) {
+/**
+ * The WebMCP toggle is deliberately not persisted: every page load starts with tools off,
+ * so a demo always begins from the same state. Client-side navigation keeps it.
+ */
+export function WebMcpProvider({ children, defaultEnabled = false }: { children: ReactNode; defaultEnabled?: boolean }) {
   const support = useSyncExternalStore(subscribeNever, detectModelContext, () => "unknown" as const);
-  const enabled = useSyncExternalStore(subscribeEnabled, readEnabled, () => false);
+  const [enabled, setEnabled] = useState(defaultEnabled);
   const [registeredTools, setRegisteredTools] = useState<string[]>([]);
 
-  const setEnabled = useCallback((next: boolean) => writeEnabled(next), []);
   const track = useCallback((name: string) => {
     setRegisteredTools((current) => (current.includes(name) ? current : [...current, name].sort()));
   }, []);
@@ -71,22 +47,17 @@ export function WebMcpProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<WebMcpContextValue>(
     () => ({
-      support,
-      enabled,
-      active: enabled && support === "native",
-      setEnabled,
-      registeredTools,
-      track,
-      untrack,
+      state: { support, enabled, active: enabled && support === "native", registeredTools },
+      actions: { setEnabled, track, untrack },
     }),
-    [support, enabled, setEnabled, registeredTools, track, untrack],
+    [support, enabled, registeredTools, track, untrack],
   );
 
-  return <WebMcpContext.Provider value={value}>{children}</WebMcpContext.Provider>;
+  return <WebMcpContext value={value}>{children}</WebMcpContext>;
 }
 
 export function useWebMcp(): WebMcpContextValue {
-  const context = useContext(WebMcpContext);
+  const context = use(WebMcpContext);
   if (!context) throw new Error("useWebMcp must be used inside WebMcpProvider");
   return context;
 }

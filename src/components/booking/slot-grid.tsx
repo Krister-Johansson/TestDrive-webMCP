@@ -28,11 +28,18 @@ export function SlotGrid({ slots, selectedId, onSelect }: SlotGridProps) {
       </p>
     );
   }
-  const groups = ["Morning", "Afternoon", "Evening"]
-    .map((label) => ({ label, slots: slots.filter((slot) => partOfDay(slot.startsAt) === label) }))
-    .filter((group) => group.slots.length > 0);
-  // Stagger order across groups, computed up front so render stays free of mutation.
-  const staggerIndex = new Map(slots.map((slot, index) => [slot.id, index]));
+  // One pass: bucket by part of day, count free slots, and fix the stagger order.
+  const buckets = new Map<string, { label: string; slots: SlotWithBooking[]; free: number }>();
+  const staggerIndex = new Map<string, number>();
+  slots.forEach((slot, index) => {
+    const label = partOfDay(slot.startsAt);
+    const bucket = buckets.get(label) ?? { label, slots: [], free: 0 };
+    bucket.slots.push(slot);
+    if (!slot.booking && !slot.past) bucket.free += 1;
+    buckets.set(label, bucket);
+    staggerIndex.set(slot.id, index);
+  });
+  const groups = ["Morning", "Afternoon", "Evening"].map((label) => buckets.get(label)).filter((g) => g !== undefined);
   return (
     <LazyMotion features={domAnimation} strict>
       <div className="space-y-4">
@@ -41,7 +48,7 @@ export function SlotGrid({ slots, selectedId, onSelect }: SlotGridProps) {
             <h4 className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
               {group.label}
               <span className="ml-1.5 font-normal normal-case tracking-normal">
-                {group.slots.filter((slot) => !slot.booking && !slot.past).length} free
+                {group.free} free
               </span>
             </h4>
             <ul className="grid grid-cols-2 gap-2" aria-label={`${group.label} slots`}>

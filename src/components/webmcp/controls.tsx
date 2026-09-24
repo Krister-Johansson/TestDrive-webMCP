@@ -21,7 +21,10 @@ import { useWebMcp } from "./provider";
 
 
 export function WebMcpControls() {
-  const { support, enabled, active, setEnabled, registeredTools } = useWebMcp();
+  const {
+    state: { support, enabled, active, registeredTools },
+    actions: { setEnabled },
+  } = useWebMcp();
   const unavailable = support === "unavailable";
 
   return (
@@ -68,14 +71,18 @@ export function WebMcpControls() {
 }
 
 function SupportBadge() {
-  const { support } = useWebMcp();
+  const {
+    state: { support },
+  } = useWebMcp();
   if (support === "unknown") return <Badge variant="outline">Checking…</Badge>;
   if (support === "native") return <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">Native</Badge>;
   return <Badge variant="secondary">Unavailable</Badge>;
 }
 
 export function HelpDialog() {
-  const { support } = useWebMcp();
+  const {
+    state: { support },
+  } = useWebMcp();
   const [copied, setCopied] = useState(false);
 
   async function copyFlag() {

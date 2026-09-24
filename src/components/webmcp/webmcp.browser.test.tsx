@@ -5,7 +5,6 @@ import { page } from "vitest/browser";
 import { makeCar } from "../../../tests/fixtures";
 import type { BookingDetail } from "@/lib/booking-service";
 import { WebMcpProvider } from "./provider";
-import { WEBMCP_STORAGE_KEY } from "@/lib/webmcp-links";
 import { WebMcpControls } from "./controls";
 import { GlobalTools, type GlobalToolActions } from "./global-tools";
 import { HomeToolset } from "./home-toolset";
@@ -35,7 +34,6 @@ const actions: GlobalToolActions = {
 };
 
 beforeEach(() => {
-  localStorage.removeItem(WEBMCP_STORAGE_KEY);
   resetBookingUi();
 });
 
@@ -55,7 +53,6 @@ test("the toggle registers the global tools and unregisters them again", async (
   await expect.element(toggle).toBeChecked();
   await expect.element(page.getByText("5 tools")).toBeVisible();
   expect(toolNames()).toEqual(["book_test_drive", "cancel_booking", "find_cars", "get_booking", "list_available_slots"]);
-  expect(localStorage.getItem(WEBMCP_STORAGE_KEY)).toBe("true");
 
   const result = (await stub().executeTool("book_test_drive", { slotId: "slot1", customerName: "Ada" })) as { content: { text: string }[] };
   const text = result.content.map((c) => c.text).join("");
@@ -69,11 +66,10 @@ test("the toggle registers the global tools and unregisters them again", async (
 });
 
 test("page tools register only while their page is mounted", async () => {
-  localStorage.setItem(WEBMCP_STORAGE_KEY, "true");
   const applyFilters = vi.fn(async () => 2);
   const openCar = vi.fn(async () => "Opened Norra Fjell");
   const screen = await render(
-    <WebMcpProvider>
+    <WebMcpProvider defaultEnabled>
       <HomeToolset applyFilters={applyFilters} openCar={openCar} />
     </WebMcpProvider>,
   );
@@ -86,7 +82,7 @@ test("page tools register only while their page is mounted", async () => {
   await vi.waitFor(() => expect(toolNames()).toEqual([]));
 
   await render(
-    <WebMcpProvider>
+    <WebMcpProvider defaultEnabled>
       <BookToolset car={car} slots={[{ ...slot, booking: null, past: false }]} />
     </WebMcpProvider>,
   );

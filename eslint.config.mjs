@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "playwright-report/**",
     "tests/model-context-stub.js",
+    ".agents/**",
   ]),
 ]);
 
