@@ -174,6 +174,10 @@ tests              shared test setup and the document.modelContext stub
 e2e                Playwright specs
 ```
 
+## Hosting
+
+The demo runs locally. Hosting on Vercel is deferred; the plan and the changes it needs are in `docs/deploy-vercel.md`.
+
 ## Contributing
 
 `main` is protected. Work on a branch, open a pull request, and merge once the `checks` and `e2e` workflows pass and every review comment is resolved. Direct pushes to `main` are rejected, including for admins.

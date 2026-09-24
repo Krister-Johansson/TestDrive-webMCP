@@ -1,6 +1,6 @@
 # Hosting on Vercel
 
-Not done yet. This is the plan and what has to change first.
+Deferred: the demo runs locally, and the owner does not want a hosted database for it right now. This is the plan for when that changes. Vercel's Hobby plan and Turso's free tier would cover a demo of this size; the work is in the code changes below, not the bill.
 
 ## What does not survive a serverless host
 
