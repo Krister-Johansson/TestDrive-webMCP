@@ -133,23 +133,58 @@
 }
 
 /* View transitions */
-::view-transition-old(root),
+:root {
+  --vt-duration-enter: 260ms;
+  --vt-duration-exit: 180ms;
+  --vt-duration-move: 320ms;
+  --vt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Live root: this app refreshes in the background constantly, so the root never cross-fades. */
+::view-transition-old(root) {
+  display: none;
+}
 ::view-transition-new(root) {
-  animation-duration: 220ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation: none;
 }
 
-::view-transition-group(*) {
-  animation-duration: 320ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+/* Persistent chrome and floating layers stay put and stay interactive. */
+::view-transition-old(site-header),
+::view-transition-old(toaster),
+::view-transition-old(car-modal),
+::view-transition-old(confirm-sheet) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(toaster),
+::view-transition-new(car-modal),
+::view-transition-new(confirm-sheet) {
+  animation: none;
+}
+::view-transition-group(site-header) {
+  z-index: 100;
+}
+::view-transition-group(toaster),
+::view-transition-group(car-modal),
+::view-transition-group(confirm-sheet) {
+  z-index: 200;
 }
 
+/* Unnamed content stays clickable while a transition runs. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Cards entering and leaving the results grid. */
+::view-transition-group(.card) {
+  animation-duration: var(--vt-duration-move);
+  animation-timing-function: var(--vt-ease);
+}
 ::view-transition-new(.card):only-child {
-  animation: card-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: card-in var(--vt-duration-enter) var(--vt-ease);
 }
-
 ::view-transition-old(.card):only-child {
-  animation: card-out 180ms ease-in;
+  animation: card-out var(--vt-duration-exit) ease-in;
 }
 
 @keyframes card-in {
@@ -170,6 +205,7 @@
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
-    animation: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }

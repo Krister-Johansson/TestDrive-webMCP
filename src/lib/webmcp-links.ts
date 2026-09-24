@@ -1,4 +1,3 @@
-export const WEBMCP_STORAGE_KEY = "testdrive.webmcp.enabled";
 export const WEBMCP_FLAG_URL = "chrome://flags/#enable-webmcp-testing";
 export const WEBMCP_LINKS = {
   docs: "https://developer.chrome.com/docs/ai/webmcp",

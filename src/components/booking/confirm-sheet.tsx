@@ -40,7 +40,7 @@ export function ConfirmSheet({ car, slot, open, onOpenChange, submit, onBooked }
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md">
+      <SheetContent side="right" style={{ viewTransitionName: "confirm-sheet" }} className="sm:max-w-md">
         {booked ? (
           <BookedView booking={booked} onDone={() => handleOpenChange(false)} />
         ) : (

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { render } from "vitest-browser-react";
-import { CarPhotos } from "./car-photos";
+import { CarPhotoCard, CarPhotoDetail } from "./car-photos";
 import { makeCar } from "../../../tests/fixtures";
 
 const images = [
@@ -9,14 +9,14 @@ const images = [
 ];
 
 test("shows the generated placeholder when a car has no photos", async () => {
-  const screen = await render(<CarPhotos car={makeCar()} variant="card" />);
+  const screen = await render(<CarPhotoCard car={makeCar()} href="/book/car1" />);
   await expect.element(screen.getByRole("img", { name: "Norra Fjell" })).toBeVisible();
   await expect.element(screen.getByText("Fjell")).toBeVisible();
   expect(document.querySelector("img")).toBeNull();
 });
 
 test("shows the photos as a carousel with dots and a credit link", async () => {
-  const screen = await render(<CarPhotos car={makeCar({ images })} />);
+  const screen = await render(<CarPhotoDetail car={makeCar({ images })} />);
   await expect.element(screen.getByRole("img", { name: "Norra Fjell, photo 1 of 2" })).toBeVisible();
   await expect.element(screen.getByRole("tab", { name: "Photo 1" })).toHaveAttribute("aria-selected", "true");
   await expect.element(screen.getByRole("link", { name: /Photo: Ann/ })).toHaveAttribute("href", "https://commons.wikimedia.org/wiki/File:a.jpg");
@@ -26,7 +26,7 @@ test("shows the photos as a carousel with dots and a credit link", async () => {
 });
 
 test("the card variant has no caption and its photo links stay out of the accessibility tree", async () => {
-  const screen = await render(<CarPhotos car={makeCar({ images })} variant="card" href="/book/car1" />);
+  const screen = await render(<CarPhotoCard car={makeCar({ images })} href="/book/car1" />);
   await expect.element(screen.getByRole("img", { name: "Norra Fjell, photo 1 of 2" })).toBeVisible();
   await expect.element(screen.getByText(/Photo: Ann/)).not.toBeInTheDocument();
   await expect.element(screen.getByRole("link")).not.toBeInTheDocument();

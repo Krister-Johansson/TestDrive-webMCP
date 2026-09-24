@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Car } from "@/db/schema";
 import type { ActionResult } from "@/lib/actions";
 import { countSlots, daysBetween } from "@/lib/slot-math";
 import { toLocalDay } from "@/lib/booking-service";
@@ -13,7 +14,8 @@ import { toLocalDay } from "@/lib/booking-service";
 export type SlotGeneratorInput = { car: string; from: string; to: string; startHour: number; endHour: number };
 
 export type SlotGeneratorProps = {
-  cars: { id: string; label: string }[];
+  /** The fleet; only active cars are offered. */
+  cars: Pick<Car, "id" | "brand" | "model" | "active">[];
   onSubmit: (input: SlotGeneratorInput) => Promise<ActionResult<{ count: number }>>;
 };
 
@@ -21,7 +23,8 @@ const HOURS = Array.from({ length: 25 }, (_, hour) => hour);
 
 export function SlotGenerator({ cars, onSubmit }: SlotGeneratorProps) {
   const today = toLocalDay(new Date());
-  const [car, setCar] = useState(cars[0]?.id ?? "");
+  const activeCars = cars.filter((c) => c.active);
+  const [car, setCar] = useState(activeCars[0]?.id ?? "");
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
   const [startHour, setStartHour] = useState(9);
@@ -31,7 +34,7 @@ export function SlotGenerator({ cars, onSubmit }: SlotGeneratorProps) {
 
   const days = daysBetween(from, to);
   const total = countSlots({ from, to, startHour, endHour });
-  const carItems = cars.map((c) => ({ value: c.id, label: c.label }));
+  const carItems = activeCars.map((c) => ({ value: c.id, label: `${c.brand} ${c.model}` }));
   const hourItems = (hours: number[]) => hours.map((h) => ({ value: String(h), label: `${String(h).padStart(2, "0")}:00` }));
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

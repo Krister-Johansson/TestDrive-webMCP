@@ -1,9 +1,14 @@
+import { cache } from "react";
 import { parseLocalDay, toLocalDay, type BookingService } from "./booking-service";
 import { isIsoDay } from "./dates";
+import { getBookingService } from "./service";
+
+/** One car lookup per request, shared by generateMetadata and the page body. */
+export const getCarForRequest = cache((carId: string) => getBookingService().findCar(carId));
 
 /** Loads everything the car booking view needs: the car, its days, and the slots for the chosen day. */
 export function loadBookingView(service: BookingService, carId: string, date: string | string[] | undefined) {
-  const car = service.findCar(carId);
+  const car = service === getBookingService() ? getCarForRequest(carId) : service.findCar(carId);
   if (!car || !car.active) return null;
   const days = service.listSlotDays(car.id);
   const today = toLocalDay(new Date());
@@ -16,7 +21,14 @@ export function loadBookingView(service: BookingService, carId: string, date: st
       requested = null; // an impossible date such as 2026-02-30 falls back to the default day
     }
   }
-  const selected = requested ?? days.find((day) => day.date >= today)?.date ?? days[0]?.date ?? today;
+  // Default to the first upcoming day that still has something to book, so a late visit
+  // does not open on a day whose slots have all passed.
+  const selected =
+    requested ??
+    days.find((day) => day.date >= today && day.available > 0)?.date ??
+    days.find((day) => day.date >= today)?.date ??
+    days[0]?.date ??
+    today;
   const slots = service.listSlots({ carId: car.id, date: selected });
   return { car, days, selected, slots };
 }

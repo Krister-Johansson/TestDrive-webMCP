@@ -45,6 +45,8 @@ export const COLOR_NAMES = CAR_COLORS.map((color) => color.name) as unknown as r
 ];
 export type CarColor = (typeof CAR_COLORS)[number]["name"];
 
+const COLOR_HEX = new Map<string, string>(CAR_COLORS.map((color) => [color.name, color.hex]));
+
 export function colorHex(name: CarColor): string {
-  return (CAR_COLORS.find((color) => color.name === name) ?? CAR_COLORS[2]).hex;
+  return COLOR_HEX.get(name) ?? CAR_COLORS[2].hex;
 }

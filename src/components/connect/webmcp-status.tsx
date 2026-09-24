@@ -12,7 +12,9 @@ const find = tools.find((t) => t.name === "find_cars");
 console.log(await document.modelContext.executeTool(find, JSON.stringify({ powertrain: "electric" })));`;
 
 export function WebMcpStatus() {
-  const { support, enabled, active, registeredTools } = useWebMcp();
+  const {
+    state: { support, enabled, active, registeredTools },
+  } = useWebMcp();
   return (
     <div className="space-y-4">
       <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { createContext, use, useId, useState, type ReactNode } from "react";
 import { Check, Search, SlidersHorizontal, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,15 +75,30 @@ function applyChange<K extends keyof CarFilters>(filters: CarFilters, key: K, va
   return next;
 }
 
-export type FilterPanelProps = {
-  filters: CarFilters;
-  onChange: (filters: CarFilters) => void;
-  /** Values still in stock for each control, given the other active filters. */
-  options: FacetOptions;
+export type FilterContextValue = {
+  state: { filters: CarFilters; options: FacetOptions; resultCount: number };
+  actions: { change: (filters: CarFilters) => void };
 };
 
+const FilterContext = createContext<FilterContextValue | null>(null);
+
+/** Owns the filter state for the panel, the summary, and the heading, wherever they render. */
+export function FilterProvider({ value, children }: { value: FilterContextValue; children: ReactNode }) {
+  return <FilterContext value={value}>{children}</FilterContext>;
+}
+
+export function useFilters(): FilterContextValue {
+  const context = use(FilterContext);
+  if (!context) throw new Error("Filter components must be rendered inside FilterProvider");
+  return context;
+}
+
 /** The stacked filter controls. Lives in the sidebar on wide screens and in a sheet on phones. */
-export function FilterPanel({ filters, onChange, options }: FilterPanelProps) {
+export function FilterPanel() {
+  const {
+    state: { filters, options },
+    actions: { change: onChange },
+  } = useFilters();
   const id = useId();
   const [feature, setFeature] = useState(filters.feature ?? "");
   const [syncedFeature, setSyncedFeature] = useState(filters.feature);
@@ -257,23 +272,15 @@ export function FilterPanel({ filters, onChange, options }: FilterPanelProps) {
   );
 }
 
-export type FilterSummaryProps = {
-  filters: CarFilters;
-  onChange: (filters: CarFilters) => void;
-  resultCount: number;
-  /** Rendered on the left, for the mobile filter button. */
-  leading?: React.ReactNode;
-  /** Rendered on the right, for the view toggle. */
-  trailing?: React.ReactNode;
-  className?: string;
-};
-
-/** Result count, active filter chips, and clear all. Sits above the car grid. */
-export function FilterSummary({ filters, onChange, resultCount, leading, trailing, className }: FilterSummaryProps) {
+/** Result count, active filter chips, and clear all. Sits in the toolbar above the results. */
+export function FilterSummary({ className }: { className?: string }) {
+  const {
+    state: { filters, resultCount },
+    actions: { change: onChange },
+  } = useFilters();
   const active = CAR_FILTER_KEYS.filter((key) => filters[key] !== undefined);
   return (
     <div className={cn("flex min-h-9 flex-wrap items-center gap-2", className)}>
-      {leading}
       <span className="text-sm font-medium tabular-nums" aria-live="polite">
         {resultCount} {resultCount === 1 ? "car" : "cars"}
       </span>
@@ -299,12 +306,15 @@ export function FilterSummary({ filters, onChange, resultCount, leading, trailin
           Clear all
         </Button>
       ) : null}
-      {trailing}
     </div>
   );
 }
 
-export function FilterPanelHeading({ filters, onChange }: { filters: CarFilters; onChange: (f: CarFilters) => void }) {
+export function FilterPanelHeading() {
+  const {
+    state: { filters },
+    actions: { change: onChange },
+  } = useFilters();
   const count = countActiveFilters(filters);
   return (
     <div className="mb-4 flex items-center justify-between">

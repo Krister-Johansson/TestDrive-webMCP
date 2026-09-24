@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ViewTransition } from "react";
 import { Armchair, CalendarDays, Cog, Fuel, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -7,16 +6,14 @@ import type { Car } from "@/db/schema";
 import { ENUM_LABELS } from "@/lib/car-enums";
 import { carName } from "@/lib/format";
 import { withQuery } from "@/lib/search-params";
-import { CarPhotos } from "./car-photos";
+import { CarPhotoCard } from "./car-photos";
 
 export function CarCard({ car, query = "" }: { car: Car; query?: string }) {
   const href = withQuery(`/book/${car.id}`, query);
   return (
     <Card className="group/card h-full overflow-hidden py-0 transition-colors hover:border-foreground/30">
       <CardHeader className="relative p-0">
-        <ViewTransition name={`car-${car.id}`} share="morph" default="none">
-          <CarPhotos car={car} variant="card" href={href} />
-        </ViewTransition>
+        <CarPhotoCard car={car} href={href} />
         <span
           className="absolute top-3 left-3 size-3 rounded-full ring-2 ring-background"
           style={{ background: car.colorHex }}

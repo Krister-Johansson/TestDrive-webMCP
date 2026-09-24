@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminTabs, type AdminTab } from "@/components/admin/admin-tabs";
+import { AdminTabPanel, AdminTabs, type AdminTab } from "@/components/admin/admin-tabs";
 import { BookingsTable } from "@/components/admin/bookings-table";
 import { BrandsPanel } from "@/components/admin/brands-panel";
 import { CarsTable } from "@/components/admin/cars-table";
@@ -25,15 +25,19 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const overview = cars
     .filter((car) => car.active)
     .map((car) => {
-      const days = service.listSlotDays(car.id).filter((day) => day.date >= today);
-      return {
-        carId: car.id,
-        car: `${car.brand} ${car.model}`,
-        days: days.length,
-        total: days.reduce((sum, day) => sum + day.total, 0),
-        available: days.reduce((sum, day) => sum + day.available, 0),
-        nextDay: days.find((day) => day.available > 0)?.date ?? null,
-      };
+      // One pass over the car's days for the count, totals, and the next free day.
+      let count = 0;
+      let total = 0;
+      let available = 0;
+      let nextDay: string | null = null;
+      for (const day of service.listSlotDays(car.id)) {
+        if (day.date < today) continue;
+        count += 1;
+        total += day.total;
+        available += day.available;
+        if (nextDay === null && day.available > 0) nextDay = day.date;
+      }
+      return { carId: car.id, car: `${car.brand} ${car.model}`, days: count, total, available, nextDay };
     });
 
   return (
@@ -43,21 +47,23 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <p className="text-muted-foreground">Manage the fleet, schedule slots, and keep an eye on bookings.</p>
       </div>
       <AdminToolset />
-      <AdminTabs
-        tab={active}
-        cars={<CarsTable cars={cars} brands={brands} />}
-        brands={<BrandsPanel brands={brands} addBrand={createBrandAction} addModel={createModelAction} />}
-        slots={
+      <AdminTabs tab={active}>
+        <AdminTabPanel value="cars">
+          <CarsTable cars={cars} brands={brands} />
+        </AdminTabPanel>
+        <AdminTabPanel value="brands">
+          <BrandsPanel brands={brands} addBrand={createBrandAction} addModel={createModelAction} />
+        </AdminTabPanel>
+        <AdminTabPanel value="slots">
           <div className="space-y-6">
-            <SlotGenerator
-              cars={cars.filter((car) => car.active).map((car) => ({ id: car.id, label: `${car.brand} ${car.model}` }))}
-              onSubmit={generateSlotsAction}
-            />
+            <SlotGenerator cars={cars} onSubmit={generateSlotsAction} />
             <SlotOverview rows={overview} />
           </div>
-        }
-        bookings={<BookingsTable bookings={bookings} cancel={cancelBookingAction} />}
-      />
+        </AdminTabPanel>
+        <AdminTabPanel value="bookings">
+          <BookingsTable bookings={bookings} cancel={cancelBookingAction} />
+        </AdminTabPanel>
+      </AdminTabs>
     </main>
   );
 }
