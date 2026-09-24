@@ -175,16 +175,17 @@
   pointer-events: none;
 }
 
-/* Cards entering and leaving the results grid. */
+/* Cards entering and leaving the results grid. `both` holds the end state: the group runs
+   for the move duration, and without a fill mode a finished fade snaps back to visible. */
 ::view-transition-group(.card) {
   animation-duration: var(--vt-duration-move);
   animation-timing-function: var(--vt-ease);
 }
 ::view-transition-new(.card):only-child {
-  animation: card-in var(--vt-duration-enter) var(--vt-ease);
+  animation: card-in var(--vt-duration-enter) var(--vt-ease) both;
 }
 ::view-transition-old(.card):only-child {
-  animation: card-out var(--vt-duration-exit) ease-in;
+  animation: card-out var(--vt-duration-exit) ease-in both;
 }
 
 @keyframes card-in {
