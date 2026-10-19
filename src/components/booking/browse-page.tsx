@@ -3,7 +3,8 @@ import { CarFiltersClient } from "@/components/booking/car-filters-client";
 import { CarResults } from "@/components/booking/car-results";
 import { HomePageTools } from "@/components/webmcp/home-tools";
 import { parseCarFiltersLenient } from "@/lib/car-filters";
-import { parseCarSort, sortCars } from "@/lib/car-sort";
+import { parseCarGroup, parseCarSort, sortCars } from "@/lib/car-sort";
+import { parseTableLayout, TABLE_LAYOUT_COOKIE } from "@/lib/car-table-layout";
 import { parseResultsView, RESULTS_VIEW_COOKIE } from "@/lib/results-view";
 import { toSearchParams, type SearchParams } from "@/lib/search-params";
 import { getBookingService } from "@/lib/service";
@@ -12,7 +13,9 @@ import { getBookingService } from "@/lib/service";
 export async function BrowsePage({ searchParams }: { searchParams: SearchParams }) {
   const params = toSearchParams(searchParams);
   const filters = parseCarFiltersLenient(params);
-  const view = parseResultsView((await cookies()).get(RESULTS_VIEW_COOKIE)?.value);
+  const cookieStore = await cookies();
+  const view = parseResultsView(cookieStore.get(RESULTS_VIEW_COOKIE)?.value);
+  const layout = parseTableLayout(cookieStore.get(TABLE_LAYOUT_COOKIE)?.value);
   const service = getBookingService();
   const sort = parseCarSort(params);
   const cars = sortCars(service.findCars(filters), sort);
@@ -28,7 +31,7 @@ export async function BrowsePage({ searchParams }: { searchParams: SearchParams 
         resultCount={cars.length}
         view={view}
       >
-        <CarResults cars={cars} view={view} sort={sort} currentQuery={params.toString()} />
+        <CarResults cars={cars} view={view} sort={sort} currentQuery={params.toString()} group={parseCarGroup(params)} layout={layout} />
       </CarFiltersClient>
     </main>
   );

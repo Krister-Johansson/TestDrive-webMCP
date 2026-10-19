@@ -47,12 +47,12 @@ test.describe("home page", () => {
 
     await page.getByRole("link", { name: "Year" }).click();
     await expect(page).toHaveURL(/sort=year&order=asc/);
-    await expect(page.getByRole("columnheader", { name: "Year" })).toHaveAttribute("aria-sort", "ascending");
+    await expect(page.getByRole("columnheader", { name: /Year/ })).toHaveAttribute("aria-sort", "ascending");
     await expect(firstCar()).toHaveText("Aldo Cinque");
 
     await page.getByRole("link", { name: "Year" }).click();
     await expect(page).toHaveURL(/sort=year&order=desc/);
-    await expect(page.getByRole("columnheader", { name: "Year" })).toHaveAttribute("aria-sort", "descending");
+    await expect(page.getByRole("columnheader", { name: /Year/ })).toHaveAttribute("aria-sort", "descending");
     await expect(firstCar()).toHaveText("Aldo Sera");
 
     await page.getByRole("button", { name: "Electric" }).click();
@@ -60,6 +60,54 @@ test.describe("home page", () => {
     await expect(page).toHaveURL(/sort=year&order=desc/);
     await expect(page.getByText("3 cars", { exact: true })).toBeVisible();
     await expect(firstCar()).toHaveText("Kestrel Lane");
+  });
+
+  test("groups the table, hides and moves columns, and keeps the layout after a reload", async ({ page, context }) => {
+    await page.goto("/");
+    await context.addCookies([{ name: "testdrive.results-view.v1", value: "table", url: page.url() }]);
+    await page.reload();
+    const headerIds = () =>
+      page.getByRole("columnheader").evaluateAll((cells) => cells.map((cell) => cell.getAttribute("data-column-id")));
+
+    await page.getByRole("button", { name: /Group by/ }).click();
+    await page.getByRole("menuitem", { name: "Powertrain" }).click();
+    await expect(page).toHaveURL(/group=powertrain/);
+    const electric = page.getByRole("button", { name: /Powertrain: Electric.*3 cars/ });
+    await expect(electric).toHaveAttribute("aria-expanded", "true");
+    await electric.click();
+    await expect(electric).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("link", { name: "Kestrel Lane" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Columns" }).click();
+    await page.getByRole("menuitemcheckbox", { name: "Seats" }).click();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("columnheader", { name: /Seats/ })).toHaveCount(0);
+
+    // Drag the Year header by its label past the Body header. Moving more than 5 px starts a drag, so the link does not sort.
+    const from = (await page.getByRole("link", { name: "Year" }).boundingBox())!;
+    const to = (await page.getByRole("columnheader", { name: /Body/ }).boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width * 0.75, from.y + from.height / 2, { steps: 12 });
+    await page.mouse.up();
+    await expect(page).not.toHaveURL(/sort=year/);
+    // The drop lands after dnd-kit's drop animation; wait for the saved layout, not the moved header cells.
+    await expect
+      .poll(async () => decodeURIComponent((await context.cookies()).find((c) => c.name === "testdrive.table-layout.v1")?.value ?? ""))
+      .toContain('"order":["brand","car","body","year"');
+    await expect.poll(headerIds).toEqual(["car", "body", "year", "powertrain", "gearbox", "drive", "towHitch", "color", "actions"]);
+    // Body cells follow the headers: the first data row reads car, body, year.
+    const firstRow = page.getByRole("row").filter({ has: page.getByRole("link", { name: "Book" }) }).first();
+    await expect(firstRow.getByRole("cell").nth(1)).toHaveText(/^(SUV|Sedan|Wagon|Hatchback|Coupe)$/);
+    await expect(firstRow.getByRole("cell").nth(2)).toHaveText(/^20\d\d$/);
+
+    await page.reload();
+    await expect(page.getByRole("button", { name: /Powertrain: Electric.*3 cars/ })).toBeVisible();
+    await expect.poll(headerIds).toEqual(["car", "body", "year", "powertrain", "gearbox", "drive", "towHitch", "color", "actions"]);
+
+    await page.getByRole("button", { name: "Columns" }).click();
+    await page.getByRole("menuitem", { name: "Reset columns" }).click();
+    await expect(page.getByRole("columnheader", { name: /Seats/ })).toBeVisible();
   });
 
   test("only offers filter values that are in stock", async ({ page }) => {

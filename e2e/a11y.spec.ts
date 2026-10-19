@@ -63,9 +63,17 @@ for (const theme of ["light", "dark"] as const) {
       await page.keyboard.press("Escape");
 
       await context.addCookies([{ name: "testdrive.results-view.v1", value: "table", url: page.url() }]);
-      await page.goto("/");
+      await page.goto("/?group=powertrain");
       await expect(page.getByRole("table")).toBeVisible();
-      await expectAccessible(page, "/ table view");
+      await expectAccessible(page, "/ table view, grouped");
+      await page.getByRole("button", { name: "Year column options" }).click();
+      await expect(page.getByRole("menuitem", { name: "Move right" })).toBeVisible();
+      await expectAccessible(page, "/ column options menu");
+      await page.keyboard.press("Escape");
+      await page.getByRole("button", { name: "Columns" }).click();
+      await expect(page.getByRole("menuitemcheckbox", { name: "Seats" })).toBeVisible();
+      await expectAccessible(page, "/ columns menu");
+      await page.keyboard.press("Escape");
     });
 
     test("browse page at 320 px with the filter sheet", async ({ page }) => {

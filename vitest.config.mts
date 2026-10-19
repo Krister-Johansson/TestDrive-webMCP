@@ -5,6 +5,8 @@ import { playwright } from "@vitest/browser-playwright";
 export default defineConfig({
   plugins: [react()],
   resolve: { tsconfigPaths: true },
+  // Pre-bundle these up front: discovering them mid-run reloads the browser and fails the first test file.
+  optimizeDeps: { include: ["@tanstack/react-table", "@dnd-kit/react", "@dnd-kit/react/sortable"] },
   test: {
     projects: [
       {

@@ -95,6 +95,8 @@ The combobox clear and open buttons had no names. They are now "Clear selection"
 - 1.4.13 Content on hover or focus: the live status tooltip is gone. The remaining hover text comes from native `title` attributes on color swatches, which the browser controls.
 - 2.1.2 No keyboard trap and 2.4.3 Focus order: the slot calendar moves with arrow keys, filter pills toggle with Space, and Tab leaves an open combobox. Closing the car modal, the confirm sheet, and the filter sheet returns focus to the control that opened them.
 - 2.5.7 Dragging movements: the carousel can be swiped, and the previous and next buttons and the dots do the same with a single tap.
+- 2.5.7 Dragging movements, table columns: dragging a header moves a column and dragging its edge resizes it. Each column's menu has Move left, Move right, Wider, Narrower, and Reset width, so both work with a single tap and from the keyboard. The resize handle is also a focusable separator that takes the left and right arrow keys.
+- 2.5.8 Target size, table columns: the resize handle is 24 px wide and centred on the column edge; the header padding keeps it 24 px clear of the menu buttons.
 - 3.1.1 Language of page: `<html lang="en">`.
 - 3.2.6 Consistent help: the WebMCP help dialog sits in the header, in the same place on every page.
 - 3.3.3 Error suggestion: each form error says what to do, for example "Pick a brand and model. Add new ones on the Brands tab."

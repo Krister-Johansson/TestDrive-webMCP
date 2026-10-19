@@ -5,7 +5,8 @@ import { startTransition, ViewTransition } from "react";
 import { LayoutGrid, List } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Car } from "@/db/schema";
-import type { CarSort } from "@/lib/car-sort";
+import type { CarGroupKey, CarSort } from "@/lib/car-sort";
+import type { TableLayout } from "@/lib/car-table-layout";
 import { RESULTS_VIEW_COOKIE, type ResultsView } from "@/lib/results-view";
 import { CarGrid } from "./car-grid";
 import { CarTable } from "./car-table";
@@ -47,19 +48,23 @@ export function CarResults({
   query = "",
   sort = null,
   currentQuery = "",
+  group = null,
+  layout,
 }: {
   cars: Car[];
   view: ResultsView;
   query?: string;
   sort?: CarSort | null;
   currentQuery?: string;
+  group?: CarGroupKey | null;
+  layout?: TableLayout;
 }) {
   return (
     <ViewTransition>
       {cars.length === 0 || view === "cards" ? (
         <CarGrid cars={cars} query={query} />
       ) : (
-        <CarTable cars={cars} query={query} sort={sort} currentQuery={currentQuery} />
+        <CarTable cars={cars} query={query} sort={sort} currentQuery={currentQuery} group={group} layout={layout} />
       )}
     </ViewTransition>
   );

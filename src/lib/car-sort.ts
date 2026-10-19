@@ -3,15 +3,21 @@ import { ENUM_LABELS } from "./car-enums";
 import { carName } from "./format";
 
 /** Table columns the browse page can sort by. The values are what the URL carries in `sort`. */
-export const CAR_SORT_KEYS = ["car", "year", "body", "powertrain", "gearbox", "drive", "seats", "towHitch", "color"] as const;
+export const CAR_SORT_KEYS = ["brand", "car", "year", "body", "powertrain", "gearbox", "drive", "seats", "towHitch", "color"] as const;
 
 export type CarSortKey = (typeof CAR_SORT_KEYS)[number];
 export type CarSort = { key: CarSortKey; order: "asc" | "desc" };
 
-const SORT_PARAMS = ["sort", "order"] as const;
+/** Columns whose values repeat across cars, so grouping by them makes sense. */
+export const CAR_GROUP_KEYS = ["brand", "year", "body", "powertrain", "gearbox", "drive", "seats", "towHitch", "color"] as const;
+export type CarGroupKey = (typeof CAR_GROUP_KEYS)[number];
+
+/** URL params that describe how the table is arranged rather than which cars match. */
+const TABLE_PARAMS = ["sort", "order", "group"] as const;
 
 /** The value each column sorts by: what the table shows, so the order matches what people read. */
 const SORT_VALUE: Record<CarSortKey, (car: Car) => string | number> = {
+  brand: (car) => car.brand,
   car: carName,
   year: (car) => car.year,
   body: (car) => ENUM_LABELS.bodyType[car.bodyType],
@@ -54,10 +60,23 @@ export function nextSortQuery(current: URLSearchParams, sort: CarSort | null, ke
   return params.toString();
 }
 
-/** Copies the sort from the current URL onto a query built from filters, so filtering keeps the order. */
-export function keepSort(next: URLSearchParams, current: URLSearchParams): URLSearchParams {
+export function parseCarGroup(params: URLSearchParams): CarGroupKey | null {
+  const key = params.get("group");
+  return (CAR_GROUP_KEYS as readonly (string | null)[]).includes(key) ? (key as CarGroupKey) : null;
+}
+
+/** The query that groups by a column, or stops grouping when `key` is null. */
+export function groupQuery(current: URLSearchParams, key: CarGroupKey | null): string {
+  const params = new URLSearchParams(current);
+  if (key) params.set("group", key);
+  else params.delete("group");
+  return params.toString();
+}
+
+/** Copies sort and grouping from the current URL onto a query built from filters, so filtering keeps the arrangement. */
+export function keepTableParams(next: URLSearchParams, current: URLSearchParams): URLSearchParams {
   const params = new URLSearchParams(next);
-  for (const name of SORT_PARAMS) {
+  for (const name of TABLE_PARAMS) {
     const value = current.get(name);
     if (value !== null) params.set(name, value);
   }
