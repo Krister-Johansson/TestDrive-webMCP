@@ -151,14 +151,23 @@ for (const theme of ["light", "dark"] as const) {
       await expectAccessible(page, "slot generator result");
     });
 
-    test("header with WebMCP on: Native badge and the tools popover", async ({ page }) => {
+    test("WebMCP header, tools popover, and agent activity feed", async ({ page }) => {
       await page.addInitScript({ path: path.join(process.cwd(), "tests", "model-context-stub.js") });
       await page.goto("/");
       await expect(page.getByText("Native")).toBeVisible();
-      await page.getByRole("switch", { name: "WebMCP" }).click();
       await page.getByRole("button", { name: /\d+ tools/ }).click();
       await expect(page.getByText("Tools registered on this page")).toBeVisible();
       await expectAccessible(page, "WebMCP tools popover");
+      await page.keyboard.press("Escape");
+
+      await page.evaluate(() =>
+        (window as unknown as { __modelContextStub: { executeTool(n: string, a: unknown): Promise<unknown> } }).__modelContextStub.executeTool(
+          "list_available_slots",
+          { car: "No such car", date: "2026-10-20" },
+        ),
+      );
+      await expect(page.getByRole("log", { name: "Agent activity" }).getByLabel("Failed")).toBeVisible();
+      await expectAccessible(page, "agent activity feed");
     });
 
     test("connect page and not-found page", async ({ page }) => {
