@@ -1,9 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "@/db";
 import { createBookingService } from "./booking-service";
 import { createEventBus, type DomainEvent } from "./events";
 import { enrichEvent, parseLiveEvent } from "./live-events";
 import { SEED_CARS } from "@/db/seed";
+
+// The fixtures use fixed October 2026 dates; pin the clock so they stay in the future.
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 30, 12, 0));
+});
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 describe("enrichEvent", () => {
   it("adds a human label with car and time for booking events", () => {

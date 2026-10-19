@@ -50,6 +50,21 @@ test("requires a brand and model for a new car", async () => {
   expect(onSubmit).not.toHaveBeenCalled();
 });
 
+test("ties each error to its field and moves focus to the first invalid field", async () => {
+  const onSubmit = vi.fn(async () => ({ ok: true as const, data: car }));
+  await render(<CarFormDialog car={null} brands={brands} open onOpenChange={() => {}} onSubmit={onSubmit} />);
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("spinbutton", { name: "Seats" }).fill("0");
+  await dialog.getByRole("button", { name: "Save car" }).click();
+  const picker = dialog.getByRole("combobox", { name: "Brand and model" });
+  const seats = dialog.getByRole("spinbutton", { name: "Seats" });
+  await expect.element(picker).toHaveAttribute("aria-invalid", "true");
+  await expect.element(picker).toHaveAccessibleDescription(/pick a brand and model/i);
+  await expect.element(seats).toHaveAttribute("aria-invalid", "true");
+  await expect.element(seats).toHaveAccessibleDescription("Seats must be at least 1.");
+  await expect.element(picker).toHaveFocus();
+});
+
 test("shows the server error", async () => {
   const onSubmit = vi.fn(async () => ({ ok: false as const, error: "Year must be between 1990 and 2100.", code: "validation" }));
   await render(<CarFormDialog car={car} brands={brands} open onOpenChange={() => {}} onSubmit={onSubmit} />);

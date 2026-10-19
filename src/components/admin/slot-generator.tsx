@@ -114,11 +114,10 @@ export function SlotGenerator({ cars, onSubmit }: SlotGeneratorProps) {
           {days === 0 ? "Pick a valid date range." : `${days} ${days === 1 ? "day" : "days"}, ${total} slots of 45 minutes.`}
         </p>
         <div className="flex items-center gap-3">
-          {message ? (
-            <span role="status" className={message.tone === "ok" ? "text-sm text-emerald-600 dark:text-emerald-400" : "text-sm text-destructive"}>
-              {message.text}
-            </span>
-          ) : null}
+          {/* Always mounted: a status region inserted with its text is not reliably announced. */}
+          <span role="status" className={message?.tone === "ok" ? "text-sm text-emerald-700 dark:text-emerald-400" : "text-sm text-destructive"}>
+            {message?.text}
+          </span>
           <Button type="submit" disabled={pending || total === 0 || !car}>
             <CalendarPlus aria-hidden="true" />
             {pending ? "Generating…" : "Generate slots"}

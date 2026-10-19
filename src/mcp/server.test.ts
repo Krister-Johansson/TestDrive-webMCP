@@ -1,11 +1,20 @@
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "@/db";
 import { SEED_CARS, seedDatabase } from "@/db/seed";
 import { createBookingService, type BookingService } from "@/lib/booking-service";
 import { createEventBus } from "@/lib/events";
 import { TOOL_DEFS } from "@/lib/tool-defs";
 import { createTestDriveServer, MCP_TOOL_NAMES } from "./server";
+
+// The fixtures use fixed October 2026 dates; pin the clock so they stay in the future.
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 30, 12, 0));
+});
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 type ToolResult = { content: { type: string; text?: string }[]; isError?: boolean; structuredContent?: unknown };
 

@@ -25,11 +25,20 @@ export default function RootLayout({ children, modal }: LayoutProps<"/">) {
         <ThemeProvider>
           <LiveProvider>
             <WebMcpProvider>
+              {/* First tab stop on every page: jumps past the header (WCAG 2.4.1). */}
+              <a
+                href="#main-content"
+                className="sr-only rounded-md bg-background px-3 py-2 text-sm font-medium shadow-md focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:outline-none focus:ring-3 focus:ring-ring"
+              >
+                Skip to content
+              </a>
               <SiteHeader>
                 <WebMcpControls />
               </SiteHeader>
               <GlobalToolsMount />
-              <div className="flex-1">{children}</div>
+              <div id="main-content" tabIndex={-1} className="flex-1 outline-none">
+                {children}
+              </div>
               {modal}
               <ActivityFeed />
               {/* Always-mounted, named wrapper so toasts are not captured in the root transition. */}

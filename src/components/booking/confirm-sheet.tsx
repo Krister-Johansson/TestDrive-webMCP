@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { LazyMotion, domAnimation, m, useReducedMotion } from "motion/react";
 import { CalendarCheck, Check } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -107,12 +107,14 @@ function ConfirmForm({
   const [nameError, setNameError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const nameRef = useRef<HTMLInputElement>(null);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!slot) return;
     if (!name.trim()) {
       setNameError("Name is required.");
+      nameRef.current?.focus();
       return;
     }
     setNameError(null);
@@ -146,14 +148,17 @@ function ConfirmForm({
         <Field data-invalid={nameError ? true : undefined}>
           <FieldLabel htmlFor="confirm-name">Name</FieldLabel>
           <Input
+            ref={nameRef}
             id="confirm-name"
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoComplete="name"
             aria-invalid={nameError ? true : undefined}
+            aria-describedby={nameError ? "confirm-name-error" : undefined}
             placeholder="Your full name"
           />
-          {nameError ? <FieldError>{nameError}</FieldError> : null}
+          {nameError ? <FieldError id="confirm-name-error">{nameError}</FieldError> : null}
         </Field>
         <Field>
           <FieldLabel htmlFor="confirm-email">Email (optional)</FieldLabel>

@@ -109,7 +109,12 @@ function CarForm({ car, brands, open, onOpenChange, onSubmit }: CarFormDialogPro
     const seats = Number(draft.seats);
     if (!Number.isInteger(seats) || seats < 1) nextErrors.seats = "Seats must be at least 1.";
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    const firstInvalid = (["brandModel", "year", "seats"] as const).find((key) => nextErrors[key]);
+    if (firstInvalid) {
+      // Move focus to the first field that needs fixing, so its error is read with it.
+      document.getElementById(`car-${firstInvalid}`)?.focus();
+      return;
+    }
 
     const brandModel = draft.brandModel;
     if (!brandModel) return;
@@ -155,8 +160,14 @@ function CarForm({ car, brands, open, onOpenChange, onSubmit }: CarFormDialogPro
           <div className="grid gap-4 sm:grid-cols-2">
             <Field className="sm:col-span-2" data-invalid={errors.brandModel ? true : undefined}>
               <FieldLabel htmlFor="car-brandModel">Brand and model</FieldLabel>
-              <BrandModelPicker id="car-brandModel" brands={brands} value={draft.brandModel} onChange={(v) => update("brandModel", v)} />
-              {errors.brandModel ? <FieldError>{errors.brandModel}</FieldError> : null}
+              <BrandModelPicker
+                id="car-brandModel"
+                brands={brands}
+                value={draft.brandModel}
+                onChange={(v) => update("brandModel", v)}
+                errorId={errors.brandModel ? "car-brandModel-error" : undefined}
+              />
+              {errors.brandModel ? <FieldError id="car-brandModel-error">{errors.brandModel}</FieldError> : null}
             </Field>
             <TextField id="year" label="Year" type="number" value={draft.year} error={errors.year} onChange={(v) => update("year", v)} />
             <TextField id="seats" label="Seats" type="number" value={draft.seats} error={errors.seats} onChange={(v) => update("seats", v)} />
@@ -231,9 +242,10 @@ function TextField({
         value={value}
         placeholder={placeholder}
         aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `car-${id}-error` : undefined}
         onChange={(e) => onChange(e.target.value)}
       />
-      {error ? <FieldError>{error}</FieldError> : null}
+      {error ? <FieldError id={`car-${id}-error`}>{error}</FieldError> : null}
     </Field>
   );
 }

@@ -41,7 +41,13 @@ export function WebMcpStatus() {
           <p className="text-sm font-medium">Try it in DevTools</p>
           <CopyButton text={DEVTOOLS_SNIPPET} />
         </div>
-        <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+        {/* Focusable so keyboard users can scroll the overflow (WCAG 2.1.1). */}
+        <pre
+          tabIndex={0}
+          role="region"
+          aria-label="DevTools snippet"
+          className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        >
           <code>{DEVTOOLS_SNIPPET}</code>
         </pre>
         <p className="text-xs text-muted-foreground">

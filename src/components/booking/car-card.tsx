@@ -23,7 +23,7 @@ export function CarCard({ car, query = "" }: { car: Car; query?: string }) {
           {ENUM_LABELS.bodyType[car.bodyType]}
         </Badge>
       </CardHeader>
-      <Link href={href} scroll={false} className="flex flex-1 flex-col outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+      <Link href={href} scroll={false} className="flex flex-1 flex-col outline-none focus-visible:ring-3 focus-visible:ring-ring">
         <CardContent className="space-y-3 pt-4">
           <div>
             <h3 className="text-lg font-semibold tracking-tight">{carName(car)}</h3>
@@ -67,7 +67,7 @@ function Spec({
   muted?: boolean;
 }) {
   return (
-    <div className={muted ? "flex items-center gap-1.5 text-muted-foreground/70" : "flex items-center gap-1.5 text-foreground/90"}>
+    <div className={muted ? "flex items-center gap-1.5 text-muted-foreground" : "flex items-center gap-1.5 text-foreground/90"}>
       <dt className="sr-only">{label}</dt>
       <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
       <dd>{children}</dd>

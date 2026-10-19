@@ -38,7 +38,13 @@ function Snippet({ title, text, description }: { title: string; text: string; de
         <h3 className="text-sm font-medium">{title}</h3>
         <CopyButton text={text} />
       </div>
-      <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+      {/* Focusable so keyboard users can scroll the overflow (WCAG 2.1.1). */}
+      <pre
+        tabIndex={0}
+        role="region"
+        aria-label={`${title} snippet`}
+        className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed outline-none focus-visible:ring-3 focus-visible:ring-ring"
+      >
         <code>{text}</code>
       </pre>
       <p className="text-xs text-muted-foreground">{description}</p>

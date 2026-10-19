@@ -1,9 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "@/db";
 import { SEED_CARS, seedDatabase } from "@/db/seed";
 import { BookingStateError, ValidationError, createBookingService, type BookingService } from "./booking-service";
 import { loadBookingView } from "./booking-view";
 import { createEventBus } from "./events";
+
+// The fixtures use fixed October 2026 dates; pin the clock so they stay in the future.
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 9, 1, 12, 0));
+});
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 describe("review fixes", () => {
   let service: BookingService;

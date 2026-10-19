@@ -221,7 +221,7 @@ export function FilterPanel() {
         <Section title="Equipment">
           {options.towHitch || filters.towHitch !== undefined ? (
             <div className="flex h-8 items-center gap-2">
-              <Switch id={`${id}-tow`} checked={filters.towHitch === true} onCheckedChange={(checked) => set("towHitch", checked ? true : undefined)} />
+              <Switch id={`${id}-tow`} aria-label="Tow hitch" checked={filters.towHitch === true} onCheckedChange={(checked) => set("towHitch", checked ? true : undefined)} />
               <Label htmlFor={`${id}-tow`} className="text-sm">
                 Tow hitch
               </Label>
@@ -281,7 +281,7 @@ export function FilterSummary({ className }: { className?: string }) {
   const active = CAR_FILTER_KEYS.filter((key) => filters[key] !== undefined);
   return (
     <div className={cn("flex min-h-9 flex-wrap items-center gap-2", className)}>
-      <span className="text-sm font-medium tabular-nums" aria-live="polite">
+      <span role="status" className="text-sm font-medium tabular-nums">
         {resultCount} {resultCount === 1 ? "car" : "cars"}
       </span>
       {active.length > 0 ? <span className="text-muted-foreground">·</span> : null}

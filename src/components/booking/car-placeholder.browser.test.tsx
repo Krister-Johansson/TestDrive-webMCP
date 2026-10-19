@@ -16,3 +16,10 @@ test("renders brand, model, and body type with an id-derived background", async 
   expect(first).toMatch(/rgb/);
   expect(second).not.toBe(first);
 });
+
+test("draws its text at full opacity, so the palette contrast is the contrast people see", async () => {
+  const screen = await render(<CarPlaceholder car={makeCar()} />);
+  const texts = screen.container.querySelectorAll("text");
+  expect(texts.length).toBeGreaterThan(0);
+  for (const text of texts) expect(getComputedStyle(text).opacity).toBe("1");
+});

@@ -20,4 +20,11 @@ describe("placeholderPalette", () => {
       expect(contrastRatio(palette.text, palette.background)).toBeGreaterThanOrEqual(4.5);
     }
   });
+
+  it("keeps 4.5:1 across the whole gradient, so the text passes over the lighter accent too", () => {
+    for (let i = 0; i < 200; i++) {
+      const palette = placeholderPalette(`car-${i}`);
+      expect(contrastRatio(palette.text, palette.accent)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
 });

@@ -32,3 +32,15 @@ test("the card variant has no caption and its photo links stay out of the access
   await expect.element(screen.getByRole("link")).not.toBeInTheDocument();
   expect(document.querySelectorAll('a[href="/book/car1"]')).toHaveLength(2);
 });
+
+test("photo dots are at least 24 by 24 CSS pixels to tap, in both variants", async () => {
+  const card = await render(<CarPhotoCard car={makeCar({ images })} href="/book/car1" />);
+  const detail = await render(<CarPhotoDetail car={makeCar({ images })} />);
+  for (const screen of [card, detail]) {
+    for (const dot of screen.getByRole("tab").elements()) {
+      const { width, height } = dot.getBoundingClientRect();
+      expect(width).toBeGreaterThanOrEqual(24);
+      expect(height).toBeGreaterThanOrEqual(24);
+    }
+  }
+});

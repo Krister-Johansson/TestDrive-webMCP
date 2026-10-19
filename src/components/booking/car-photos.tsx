@@ -54,7 +54,7 @@ function Slide({ car, image, index, sizes, priority, className, children }: Slid
 
 function Dots({ car, current, onPick, small }: { car: Car; current: number; onPick: (index: number) => void; small?: boolean }) {
   return (
-    <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5" role="tablist" aria-label="Photos">
+    <div className="absolute inset-x-0 bottom-0.5 flex justify-center" role="tablist" aria-label="Photos">
       {car.images.map((image, index) => (
         <button
           key={image.id}
@@ -63,12 +63,17 @@ function Dots({ car, current, onPick, small }: { car: Car; current: number; onPi
           aria-selected={index === current}
           aria-label={`Photo ${index + 1}`}
           onClick={() => onPick(index)}
-          className={cn(
-            "rounded-full ring-1 ring-black/30 transition-all",
-            small ? "size-1.5" : "size-2",
-            index === current ? cn("bg-white", small ? "w-4" : "w-5") : "bg-white/60 hover:bg-white/90",
-          )}
-        />
+          // The button is the 24px tap target (WCAG 2.5.8); the dot inside is the visual.
+          className="group/dot flex h-6 min-w-6 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        >
+          <span
+            className={cn(
+              "rounded-full ring-1 ring-black/30 transition-all",
+              small ? "size-1.5" : "size-2",
+              index === current ? cn("bg-white", small ? "w-4" : "w-5") : "bg-white/60 group-hover/dot:bg-white/90",
+            )}
+          />
+        </button>
       ))}
     </div>
   );

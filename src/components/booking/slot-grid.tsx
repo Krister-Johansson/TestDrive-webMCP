@@ -72,7 +72,7 @@ export function SlotGrid({ slots, selectedId, onSelect }: SlotGridProps) {
                       data-slot-id={slot.id}
                       className={cn(
                         "flex h-11 w-full items-center justify-between rounded-lg border px-3 text-sm transition-all duration-150",
-                        "outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                        "outline-none focus-visible:ring-3 focus-visible:ring-ring",
                         unavailable
                           ? "cursor-not-allowed border-transparent bg-muted/60 text-muted-foreground"
                           : "bg-card hover:border-foreground/40 hover:bg-accent/40",
