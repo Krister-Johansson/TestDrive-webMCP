@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeCar } from "../../tests/fixtures";
-import { keepSort, nextSortQuery, parseCarSort, sortCars } from "./car-sort";
+import { groupQuery, keepTableParams, nextSortQuery, parseCarGroup, parseCarSort, sortCars } from "./car-sort";
 
 // Norra Fjell 2026 7 seats, Norra Vik 2025, Norra Skog 2024, Aldo Cinque 2023 4 seats, Aldo Sera 2026 2 seats.
 const cars = [0, 1, 2, 3, 4].map((index) => makeCar({}, index));
@@ -44,11 +44,31 @@ describe("car sorting", () => {
     expect(nextSortQuery(current, { key: "year", order: "desc" }, "seats")).toBe("powertrain=electric&sort=seats&order=asc");
   });
 
-  it("carries the sort over to a query built from filters", () => {
+  it("carries the sort and grouping over to a query built from filters", () => {
     const filters = new URLSearchParams("bodyType=suv");
-    expect(keepSort(filters, new URLSearchParams("powertrain=electric&sort=year&order=desc")).toString()).toBe(
-      "bodyType=suv&sort=year&order=desc",
+    expect(keepTableParams(filters, new URLSearchParams("powertrain=electric&sort=year&order=desc&group=body")).toString()).toBe(
+      "bodyType=suv&sort=year&order=desc&group=body",
     );
-    expect(keepSort(filters, new URLSearchParams("powertrain=electric")).toString()).toBe("bodyType=suv");
+    expect(keepTableParams(filters, new URLSearchParams("powertrain=electric")).toString()).toBe("bodyType=suv");
+  });
+
+  it("sorts by brand", () => {
+    expect(names(sortCars(cars, { key: "brand", order: "desc" }))[0]).toBe("Fjell");
+  });
+});
+
+describe("car grouping", () => {
+  it("parses a groupable column and ignores the rest", () => {
+    expect(parseCarGroup(new URLSearchParams("group=powertrain"))).toBe("powertrain");
+    expect(parseCarGroup(new URLSearchParams("group=brand"))).toBe("brand");
+    expect(parseCarGroup(new URLSearchParams("group=car"))).toBeNull();
+    expect(parseCarGroup(new URLSearchParams("group=nope"))).toBeNull();
+    expect(parseCarGroup(new URLSearchParams(""))).toBeNull();
+  });
+
+  it("sets or clears the group in a query and keeps everything else", () => {
+    const current = new URLSearchParams("powertrain=electric&sort=year&order=asc");
+    expect(groupQuery(current, "body")).toBe("powertrain=electric&sort=year&order=asc&group=body");
+    expect(groupQuery(new URLSearchParams("group=body&sort=year"), null)).toBe("sort=year");
   });
 });
