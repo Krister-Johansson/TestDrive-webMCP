@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { startTransition } from "react";
 import { findCarAction, findCarsAction } from "@/lib/actions";
 import { filtersToSearchParams, type CarFilters } from "@/lib/car-filters";
+import { keepSort } from "@/lib/car-sort";
 import { HomeToolset } from "./home-toolset";
 
 /** Wires the home page tools to the router and the server. */
@@ -12,7 +13,7 @@ export function HomePageTools() {
   const pathname = usePathname();
 
   async function applyFilters(filters: CarFilters) {
-    const query = filtersToSearchParams(filters).toString();
+    const query = keepSort(filtersToSearchParams(filters), new URLSearchParams(window.location.search)).toString();
     startTransition(() => {
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
     });
