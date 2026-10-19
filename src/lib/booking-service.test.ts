@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/db";
 import { createEventBus, type DomainEvent, type EventBus } from "./events";
 import {
@@ -9,6 +9,15 @@ import {
   type BookingService,
   type NewCar,
 } from "./booking-service";
+
+// The fixtures use fixed October 2026 dates; pin the clock so they stay in the future.
+beforeAll(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 30, 12, 0));
+});
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 const baseCar: NewCar = {
   brand: "Norra",
