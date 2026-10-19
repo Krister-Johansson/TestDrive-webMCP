@@ -151,12 +151,14 @@
 /* Persistent chrome and floating layers stay put and stay interactive. */
 ::view-transition-old(site-header),
 ::view-transition-old(toaster),
+::view-transition-old(agent-activity),
 ::view-transition-old(car-modal),
 ::view-transition-old(confirm-sheet) {
   display: none;
 }
 ::view-transition-new(site-header),
 ::view-transition-new(toaster),
+::view-transition-new(agent-activity),
 ::view-transition-new(car-modal),
 ::view-transition-new(confirm-sheet) {
   animation: none;
@@ -165,6 +167,7 @@
   z-index: 100;
 }
 ::view-transition-group(toaster),
+::view-transition-group(agent-activity),
 ::view-transition-group(car-modal),
 ::view-transition-group(confirm-sheet) {
   z-index: 200;
