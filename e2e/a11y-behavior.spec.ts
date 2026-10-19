@@ -133,6 +133,8 @@ test.describe("2.1.1 and 2.1.2 keyboard", () => {
 });
 
 test("2.4.7 and 1.4.11 the focus indicator is visible with 3:1 contrast, in both themes", async ({ page }) => {
+  // 240 Tab presses, each waiting for the ring transition: too slow for the default 30 s on CI runners.
+  test.setTimeout(120_000);
   const car = await carPath(page, /Kestrel Lane/);
   for (const scheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: scheme });
