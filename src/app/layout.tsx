@@ -4,6 +4,7 @@ import { LiveProvider } from "@/components/live/live-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ActivityFeed } from "@/components/webmcp/activity-feed";
 import { WebMcpControls } from "@/components/webmcp/controls";
 import { GlobalToolsMount } from "@/components/webmcp/global-tools-mount";
 import { WebMcpProvider } from "@/components/webmcp/provider";
@@ -30,6 +31,7 @@ export default function RootLayout({ children, modal }: LayoutProps<"/">) {
               <GlobalToolsMount />
               <div className="flex-1">{children}</div>
               {modal}
+              <ActivityFeed />
               {/* Always-mounted, named wrapper so toasts are not captured in the root transition. */}
               <div style={{ viewTransitionName: "toaster" }} className="pointer-events-none fixed inset-0 z-50">
                 <Toaster position="bottom-right" richColors closeButton className="pointer-events-auto" />

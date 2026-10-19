@@ -5,6 +5,7 @@ import { useWebMCP } from "usewebmcp";
 import type { ToolDef } from "@/lib/tool-defs";
 import { clamp } from "@/lib/tool-output";
 import type { ObjectSchema } from "@/lib/webmcp-schemas";
+import { finishCall, startCall } from "./activity-store";
 import { useWebMcp } from "./provider";
 
 export type ToolFailure = { content: { type: "text"; text: string }[]; isError: true };
@@ -33,12 +34,18 @@ export function useAppTool(def: ToolDef, inputSchema: ObjectSchema, execute: App
       annotations: def.annotations,
       enabled: active,
       execute: async (input) => {
+        const args = input as Record<string, unknown>;
+        const callId = startCall(def.name, args);
+        let result: string | ToolFailure;
         try {
-          const result = await execute(input as Record<string, unknown>);
-          return typeof result === "string" ? clamp(result) : result;
+          const output = await execute(args);
+          result = typeof output === "string" ? clamp(output) : output;
         } catch (error) {
-          return toolError(error instanceof Error ? error.message : String(error));
+          result = toolError(error instanceof Error ? error.message : String(error));
         }
+        // Every call lands in the on-page activity feed so the audience sees what the agent did.
+        finishCall(callId, typeof result === "string" ? { ok: true, text: result } : { ok: false, text: result.content[0]?.text ?? "" });
+        return result;
       },
     },
     deps,

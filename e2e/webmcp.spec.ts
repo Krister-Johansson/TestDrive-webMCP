@@ -50,7 +50,10 @@ test("tools register on load without a toggle and drive the page", async ({ page
   const filtered = (await executeTool(page, "filter_cars", { powertrain: "electric" })) as { content: { text: string }[] };
   expect(filtered.content[0].text).toContain("3 cars");
   await expect(page).toHaveURL(/powertrain=electric/);
-  await expect(page.getByText("3 cars")).toBeVisible();
+  await expect(page.getByText("3 cars", { exact: true })).toBeVisible();
+  const feed = page.getByRole("log", { name: "Agent activity" });
+  await expect(feed.getByText("filter_cars")).toBeVisible();
+  await expect(feed.getByText("powertrain: electric")).toBeVisible();
 
   const opened = (await executeTool(page, "select_car", { car: "Norra Vik" })) as { content: { text: string }[] };
   expect(opened.content[0].text).toContain("Norra Vik");
