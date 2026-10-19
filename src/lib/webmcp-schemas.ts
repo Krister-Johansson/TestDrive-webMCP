@@ -1,4 +1,5 @@
 import { BODY_TYPES, BOOKING_STATUSES, COLOR_NAMES, DRIVETRAINS, POWERTRAINS, TRANSMISSIONS } from "./car-enums";
+import { CAR_GROUP_KEYS, CAR_SORT_KEYS } from "./car-sort";
 import { ISO_DAY_PATTERN_SOURCE } from "./dates";
 import { TOOL_DEFS } from "./tool-defs";
 
@@ -112,6 +113,16 @@ export const WEBMCP_SCHEMAS = {
       model: { type: "string", description: p.add_model.params.model },
     },
     required: ["brand", "model"],
+  },
+  arrange_cars: {
+    type: "object",
+    properties: {
+      view: { type: "string", enum: ["cards", "table"], description: p.arrange_cars.params.view },
+      sortBy: { type: "string", enum: [...CAR_SORT_KEYS, "none"], description: p.arrange_cars.params.sortBy },
+      order: { type: "string", enum: ["asc", "desc"], description: p.arrange_cars.params.order },
+      groupBy: { type: "string", enum: [...CAR_GROUP_KEYS, "none"], description: p.arrange_cars.params.groupBy },
+    },
+    required: [],
   },
   select_car: {
     type: "object",

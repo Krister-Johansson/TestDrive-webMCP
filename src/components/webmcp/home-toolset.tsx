@@ -1,5 +1,6 @@
 "use client";
 
+import { parseArrangement, type Arrangement } from "@/lib/arrange";
 import { parseCarFilters, type CarFilters } from "@/lib/car-filters";
 import { TOOL_DEFS } from "@/lib/tool-defs";
 import { WEBMCP_SCHEMAS } from "@/lib/webmcp-schemas";
@@ -10,15 +11,19 @@ export type HomeToolsetProps = {
   applyFilters: (filters: CarFilters) => Promise<number>;
   /** Opens a car's booking page and resolves with a short confirmation. */
   openCar: (query: string) => Promise<string>;
+  /** Changes view, sort, or grouping and resolves with what the page now shows. */
+  arrange: (arrangement: Arrangement) => Promise<string>;
 };
 
-export function HomeToolset({ applyFilters, openCar }: HomeToolsetProps) {
+export function HomeToolset({ applyFilters, openCar, arrange }: HomeToolsetProps) {
   useAppTool(TOOL_DEFS.filter_cars, WEBMCP_SCHEMAS.filter_cars, async (input) => {
     const filters = parseCarFilters(input);
     const count = await applyFilters(filters);
     const summary = Object.keys(filters).length ? JSON.stringify(filters) : "no filters";
     return `Applied ${summary}. ${count} car${count === 1 ? "" : "s"} shown. Use find_cars for details.`;
   });
+
+  useAppTool(TOOL_DEFS.arrange_cars, WEBMCP_SCHEMAS.arrange_cars, async (input) => arrange(parseArrangement(input)));
 
   useAppTool(TOOL_DEFS.select_car, WEBMCP_SCHEMAS.select_car, async (input) => {
     const query = typeof input.car === "string" ? input.car : "";

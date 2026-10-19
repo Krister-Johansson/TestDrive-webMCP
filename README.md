@@ -74,7 +74,7 @@ The Connect page in the app shows the same snippets with the right origin and a 
 Which agent to use for each scenario matters, because not every agent speaks WebMCP.
 
 1. No tools: Claude in Chrome. The extension does not discover `document.modelContext` tools (Anthropic's tracker has an open request for it), so it clicks through the page like a person. Open the side panel on the app and ask: "Book a test drive in an electric Volvo with a tow hitch, tomorrow afternoon, for Ada Lovelace." Watch it read cards, open one, pick a slot, and fill the form. Open Admin in a second tab to watch the booking arrive live.
-2. WebMCP: an agent that reads the page's tools. Two options today. The Model Context Tool Inspector extension lists the tools, lets you call them by hand, and has a chat that sends prompts to Gemini with your own Gemini API key. As of October 2026 no built-in browser agent (Gemini in Chrome, Claude in Chrome) calls WebMCP tools yet. Open the tools popover in the header to show what the page registered, and ask the same question. The agent should call `find_cars`, `list_available_slots`, and `book_test_drive` instead of clicking. Each call appears in the Agent activity panel in the bottom left corner with its arguments and result, so the audience can follow along without the Inspector.
+2. WebMCP: an agent that reads the page's tools. Two options today. The Model Context Tool Inspector extension lists the tools, lets you call them by hand, and has a chat that sends prompts to Gemini with your own Gemini API key. As of October 2026 no built-in browser agent (Gemini in Chrome, Claude in Chrome) calls WebMCP tools yet. Open the tools popover in the header to show what the page registered, and ask the same question. The agent should call `find_cars`, `list_available_slots`, and `book_test_drive` instead of clicking. Each call appears in the Agent activity panel in the bottom left corner with its arguments and result, so the audience can follow along without the Inspector. To show the page changing under the agent, ask: "Show the electric cars as a table, newest first, grouped by drive." The agent should call `filter_cars` and then `arrange_cars`.
 3. Classic MCP: Claude Code or Claude Desktop with the server installed (snippets on the Connect page). In a terminal, `claude`, then: "Use the testdrive tools to list electric cars with a tow hitch and book the first free slot tomorrow for Ada Lovelace." The browser tab updates the moment the booking lands.
 
 ## How WebMCP works, in general
@@ -150,7 +150,7 @@ The names and descriptions live in `src/lib/tool-defs.ts` and are shared by both
 | `list_available_slots` | both | Free 45 minute slots for a car on a day |
 | `get_booking`, `book_test_drive`, `cancel_booking` | both | Read, create, cancel a booking |
 | `list_bookings`, `create_car`, `generate_slots` | MCP, and WebMCP on the admin page | Admin actions. `create_car` takes brand and model names and a color from the fixed list |
-| `filter_cars`, `select_car`, `select_slot` | WebMCP only | Drive the page the user is looking at |
+| `filter_cars`, `arrange_cars`, `select_car`, `select_slot` | WebMCP only | Drive the page the user is looking at. `arrange_cars` switches cards or table, sorts, and groups |
 
 ## Tests
 
