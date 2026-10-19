@@ -15,7 +15,25 @@ export type CarGroupKey = (typeof CAR_GROUP_KEYS)[number];
 /** URL params that describe how the table is arranged rather than which cars match. */
 const TABLE_PARAMS = ["sort", "order", "group"] as const;
 
-/** The value each column sorts by: what the table shows, so the order matches what people read. */
+/** Column names as the table header shows them. */
+export const CAR_COLUMN_LABELS: Record<CarSortKey, string> = {
+  brand: "Brand",
+  car: "Car",
+  year: "Year",
+  body: "Body",
+  powertrain: "Powertrain",
+  gearbox: "Gearbox",
+  drive: "Drive",
+  seats: "Seats",
+  towHitch: "Tow hitch",
+  color: "Color",
+};
+
+/** The value of a column for one car: what the table shows, so sorting and grouping match what people read. */
+export function carColumnValue(car: Car, key: CarSortKey): string | number {
+  return SORT_VALUE[key](car);
+}
+
 const SORT_VALUE: Record<CarSortKey, (car: Car) => string | number> = {
   brand: (car) => car.brand,
   car: carName,

@@ -59,12 +59,22 @@ test("global tools register as soon as the browser has WebMCP, with no toggle", 
 test("page tools register only while their page is mounted", async () => {
   const applyFilters = vi.fn(async () => 2);
   const openCar = vi.fn(async () => "Opened Norra Fjell");
+  const arrange = vi.fn(async () => "Showing 8 cars as a table, sorted by year (descending), grouped by powertrain into 4 groups.");
   const screen = await render(
     <WebMcpProvider>
-      <HomeToolset applyFilters={applyFilters} openCar={openCar} />
+      <HomeToolset applyFilters={applyFilters} openCar={openCar} arrange={arrange} />
     </WebMcpProvider>,
   );
-  await vi.waitFor(() => expect(toolNames()).toEqual(["filter_cars", "select_car"]));
+  await vi.waitFor(() => expect(toolNames()).toEqual(["arrange_cars", "filter_cars", "select_car"]));
+
+  const arranged = (await stub().executeTool("arrange_cars", { sortBy: "year", order: "desc", groupBy: "powertrain" })) as {
+    content: { text: string }[];
+  };
+  expect(arrange).toHaveBeenCalledWith({ view: "table", sort: { key: "year", order: "desc" }, group: "powertrain" });
+  expect(arranged.content[0].text).toContain("4 groups");
+  const invalid = (await stub().executeTool("arrange_cars", { sortBy: "price" })) as { isError?: boolean; content: { text: string }[] };
+  expect(invalid.isError).toBe(true);
+  expect(invalid.content[0].text).toContain("sortBy must be one of");
   const filtered = (await stub().executeTool("filter_cars", { powertrain: "electric" })) as { content: { text: string }[] };
   expect(applyFilters).toHaveBeenCalledWith({ powertrain: "electric" });
   expect(filtered.content[0].text).toContain("2");

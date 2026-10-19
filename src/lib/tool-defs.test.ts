@@ -16,6 +16,7 @@ describe("tool definitions", () => {
         "create_car",
         "generate_slots",
         "filter_cars",
+        "arrange_cars",
         "select_car",
         "select_slot",
         "list_brands",

@@ -144,6 +144,18 @@ export const TOOL_DEFS = {
     params: FILTER_PARAMS,
     annotations: { readOnlyHint: false },
   },
+  arrange_cars: {
+    name: "arrange_cars",
+    description:
+      "Change how the car list on this page is shown: cards or table, sort order, and grouping. Filters stay as they are; use filter_cars for those. Grouping only shows in the table, so groupBy switches to the table view. Leave an input out to keep its current setting. Returns what the page now shows.",
+    params: {
+      view: "cards or table.",
+      sortBy: "Column to sort by: brand, car, year, body, powertrain, gearbox, drive, seats, towHitch, or color. none clears the sort.",
+      order: "asc or desc. Defaults to asc when sortBy is set.",
+      groupBy: "Column to group the table by: brand, year, body, powertrain, gearbox, drive, seats, towHitch, or color. none stops grouping.",
+    },
+    annotations: { readOnlyHint: false },
+  },
   select_car: {
     name: "select_car",
     description: "Open the booking page for one car so the user can see its slots. Pass the car id or name.",

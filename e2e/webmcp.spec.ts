@@ -36,8 +36,9 @@ test("tools register on load without a toggle and drive the page", async ({ page
   await page.goto("/");
   await expect(page.getByText("Native")).toBeVisible();
   await expect(page.getByRole("switch", { name: "WebMCP" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /7 tools/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /8 tools/ })).toBeVisible();
   expect(await toolNames(page)).toEqual([
+    "arrange_cars",
     "book_test_drive",
     "cancel_booking",
     "filter_cars",
@@ -54,6 +55,20 @@ test("tools register on load without a toggle and drive the page", async ({ page
   const feed = page.getByRole("log", { name: "Agent activity" });
   await expect(feed.getByText("filter_cars")).toBeVisible();
   await expect(feed.getByText("powertrain: electric")).toBeVisible();
+
+  const arranged = (await executeTool(page, "arrange_cars", { sortBy: "year", order: "desc", groupBy: "drive" })) as {
+    content: { text: string }[];
+  };
+  expect(arranged.content[0].text).toBe("Showing 3 cars as a table, sorted by year (descending), grouped by drive into 2 groups.");
+  await expect(page).toHaveURL(/powertrain=electric/);
+  await expect(page).toHaveURL(/sort=year&order=desc&group=drive/);
+  await expect(page.getByRole("table")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Drive: AWD.*2 cars/ })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: /Year/ })).toHaveAttribute("aria-sort", "descending");
+
+  await executeTool(page, "arrange_cars", { view: "cards", groupBy: "none" });
+  await expect(page).not.toHaveURL(/group=/);
+  await expect(page.getByRole("table")).toHaveCount(0);
 
   const opened = (await executeTool(page, "select_car", { car: "Norra Vik" })) as { content: { text: string }[] };
   expect(opened.content[0].text).toContain("Norra Vik");
