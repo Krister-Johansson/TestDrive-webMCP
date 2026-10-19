@@ -39,6 +39,29 @@ test.describe("home page", () => {
     await expect(page.getByText("8 cars")).toBeVisible();
   });
 
+  test("sorts the table by a column and keeps the order while filtering", async ({ page, context }) => {
+    await page.goto("/");
+    await context.addCookies([{ name: "testdrive.results-view.v1", value: "table", url: page.url() }]);
+    await page.reload();
+    const firstCar = () => page.getByRole("table").getByRole("row").nth(1).getByRole("link").first();
+
+    await page.getByRole("link", { name: "Year" }).click();
+    await expect(page).toHaveURL(/sort=year&order=asc/);
+    await expect(page.getByRole("columnheader", { name: "Year" })).toHaveAttribute("aria-sort", "ascending");
+    await expect(firstCar()).toHaveText("Aldo Cinque");
+
+    await page.getByRole("link", { name: "Year" }).click();
+    await expect(page).toHaveURL(/sort=year&order=desc/);
+    await expect(page.getByRole("columnheader", { name: "Year" })).toHaveAttribute("aria-sort", "descending");
+    await expect(firstCar()).toHaveText("Aldo Sera");
+
+    await page.getByRole("button", { name: "Electric" }).click();
+    await expect(page).toHaveURL(/powertrain=electric/);
+    await expect(page).toHaveURL(/sort=year&order=desc/);
+    await expect(page.getByText("3 cars", { exact: true })).toBeVisible();
+    await expect(firstCar()).toHaveText("Kestrel Lane");
+  });
+
   test("only offers filter values that are in stock", async ({ page }) => {
     await page.goto("/?brand=Kestrel");
     await expect(page.getByText("3 cars")).toBeVisible();

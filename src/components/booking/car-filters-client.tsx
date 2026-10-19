@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { countActiveFilters, filtersToSearchParams, type CarFilters } from "@/lib/car-filters";
+import { keepSort } from "@/lib/car-sort";
 import type { FacetOptions } from "@/lib/booking-service";
 import { ResultsViewToggle, type ResultsView } from "./car-results";
 import { FilterPanel, FilterPanelHeading, FilterProvider, FilterSummary, useFilters } from "./filter-bar";
@@ -68,7 +69,7 @@ export function CarFiltersClient({
   function change(next: CarFilters) {
     startTransition(() => {
       setOptimistic(next);
-      const query = filtersToSearchParams(next).toString();
+      const query = keepSort(filtersToSearchParams(next), new URLSearchParams(window.location.search)).toString();
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
     });
   }
