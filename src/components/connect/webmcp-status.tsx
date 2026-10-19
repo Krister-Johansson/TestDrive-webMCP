@@ -13,7 +13,7 @@ console.log(await document.modelContext.executeTool(find, JSON.stringify({ power
 
 export function WebMcpStatus() {
   const {
-    state: { support, enabled, active, registeredTools },
+    state: { support, active, registeredTools },
   } = useWebMcp();
   return (
     <div className="space-y-4">
@@ -28,10 +28,8 @@ export function WebMcpStatus() {
             <Badge variant="outline">Checking…</Badge>
           )}
         </dd>
-        <dt className="text-muted-foreground">Toggle</dt>
-        <dd>{enabled ? "On" : "Off"}</dd>
         <dt className="text-muted-foreground">Registered here</dt>
-        <dd>{active ? `${registeredTools.length} tools` : "None while off"}</dd>
+        <dd>{active ? `${registeredTools.length} tools` : "None without WebMCP"}</dd>
       </dl>
       <div className="flex items-center gap-2 text-sm">
         <span className="text-muted-foreground">Flag:</span>
@@ -47,7 +45,7 @@ export function WebMcpStatus() {
           <code>{DEVTOOLS_SNIPPET}</code>
         </pre>
         <p className="text-xs text-muted-foreground">
-          Turn the toggle on, open the console on any page here, and paste. Chrome takes the arguments as a JSON string.
+          Open the console on any page here and paste. Chrome 153 takes the arguments as a JSON string; from Chrome 155 pass the object.
         </p>
       </div>
       <ul className="space-y-1 text-sm">

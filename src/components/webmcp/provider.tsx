@@ -6,14 +6,12 @@ export type WebMcpSupport = "unknown" | "native" | "unavailable";
 
 export type WebMcpState = {
   support: WebMcpSupport;
-  enabled: boolean;
-  /** True when tools should be registered: the toggle is on and the browser has WebMCP. */
+  /** True when tools should be registered: the browser has WebMCP. */
   active: boolean;
   registeredTools: string[];
 };
 
 export type WebMcpActions = {
-  setEnabled: (enabled: boolean) => void;
   track: (name: string) => void;
   untrack: (name: string) => void;
 };
@@ -29,13 +27,9 @@ function detectModelContext(): WebMcpSupport {
 
 const subscribeNever = () => () => {};
 
-/**
- * The WebMCP toggle is deliberately not persisted: every page load starts with tools off,
- * so a demo always begins from the same state. Client-side navigation keeps it.
- */
-export function WebMcpProvider({ children, defaultEnabled = false }: { children: ReactNode; defaultEnabled?: boolean }) {
+/** Tools register whenever the browser exposes WebMCP; there is no switch to turn them off. */
+export function WebMcpProvider({ children }: { children: ReactNode }) {
   const support = useSyncExternalStore(subscribeNever, detectModelContext, () => "unknown" as const);
-  const [enabled, setEnabled] = useState(defaultEnabled);
   const [registeredTools, setRegisteredTools] = useState<string[]>([]);
 
   const track = useCallback((name: string) => {
@@ -47,10 +41,10 @@ export function WebMcpProvider({ children, defaultEnabled = false }: { children:
 
   const value = useMemo<WebMcpContextValue>(
     () => ({
-      state: { support, enabled, active: enabled && support === "native", registeredTools },
-      actions: { setEnabled, track, untrack },
+      state: { support, active: support === "native", registeredTools },
+      actions: { track, untrack },
     }),
-    [support, enabled, registeredTools, track, untrack],
+    [support, registeredTools, track, untrack],
   );
 
   return <WebMcpContext value={value}>{children}</WebMcpContext>;

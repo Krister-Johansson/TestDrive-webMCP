@@ -32,15 +32,10 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript({ path: STUB });
 });
 
-test("the header toggle registers tools, resets on reload, and tools drive the page", async ({ page }) => {
+test("tools register on load without a toggle and drive the page", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Native")).toBeVisible();
-  const toggle = page.getByRole("switch", { name: "WebMCP" });
-  await expect(toggle).not.toBeChecked();
-  expect(await toolNames(page)).toEqual([]);
-
-  await toggle.click();
-  await expect(toggle).toBeChecked();
+  await expect(page.getByRole("switch", { name: "WebMCP" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /7 tools/ })).toBeVisible();
   expect(await toolNames(page)).toEqual([
     "book_test_drive",
@@ -51,13 +46,6 @@ test("the header toggle registers tools, resets on reload, and tools drive the p
     "list_available_slots",
     "select_car",
   ]);
-
-  // A reload starts clean: the toggle is not persisted between sessions.
-  await page.reload();
-  await expect(page.getByRole("switch", { name: "WebMCP" })).not.toBeChecked();
-  expect(await toolNames(page)).toEqual([]);
-  await page.getByRole("switch", { name: "WebMCP" }).click();
-  await expect(page.getByRole("button", { name: /7 tools/ })).toBeVisible();
 
   const filtered = (await executeTool(page, "filter_cars", { powertrain: "electric" })) as { content: { text: string }[] };
   expect(filtered.content[0].text).toContain("3 cars");
@@ -81,10 +69,10 @@ test("the header toggle registers tools, resets on reload, and tools drive the p
   expect(booked.content[0].text).toContain("confirmed");
   await expect(page.getByRole("button", { name: new RegExp(`^${time}`) })).toBeDisabled({ timeout: 10_000 });
 
+  // Closing the modal unmounts the booking view, so its page tool goes away again.
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("switch", { name: "WebMCP" }).click();
-  await expect.poll(() => toolNames(page)).toEqual([]);
+  await expect.poll(() => toolNames(page)).not.toContain("select_slot");
 });
 
 test("the connect page explains all three ways in", async ({ page }) => {

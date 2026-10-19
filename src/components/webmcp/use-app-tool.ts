@@ -16,8 +16,8 @@ export function toolError(message: string): ToolFailure {
 export type AppToolExecute = (input: Record<string, unknown>) => Promise<string | ToolFailure>;
 
 /**
- * Registers one WebMCP tool from the shared definitions. Registration follows the
- * header toggle: the tool is only exposed while WebMCP is on and the browser has it.
+ * Registers one WebMCP tool from the shared definitions. The tool is exposed while the
+ * calling component is mounted and the browser has WebMCP.
  */
 export function useAppTool(def: ToolDef, inputSchema: ObjectSchema, execute: AppToolExecute, deps: unknown[] = []) {
   const {
