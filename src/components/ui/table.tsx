@@ -3,11 +3,16 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+/**
+ * `scrollLabel` makes the scroll container a named, focusable region, so keyboard users can
+ * scroll a table that has no focusable cells when it overflows on a narrow screen (WCAG 2.1.1).
+ */
+function Table({ className, scrollLabel, ...props }: React.ComponentProps<"table"> & { scrollLabel?: string }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring"
+      {...(scrollLabel ? { tabIndex: 0, role: "region", "aria-label": scrollLabel } : {})}
     >
       <table
         data-slot="table"

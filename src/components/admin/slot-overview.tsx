@@ -13,7 +13,7 @@ export type SlotOverviewRow = {
 
 export function SlotOverview({ rows }: { rows: SlotOverviewRow[] }) {
   return (
-    <Table>
+    <Table scrollLabel="Slot overview">
       <TableHeader>
         <TableRow>
           <TableHead>Car</TableHead>

@@ -41,6 +41,17 @@ test("requires a name, then submits and shows the confirmation", async () => {
   await expect.element(page.getByRole("link", { name: /view booking/i })).toHaveAttribute("href", "/bookings/bk1");
 });
 
+test("marks the name as required and ties the error to it", async () => {
+  const submit = vi.fn();
+  await render(<ConfirmSheet car={car} slot={slot} open onOpenChange={() => {}} submit={submit} />);
+  const name = page.getByRole("textbox", { name: "Name" });
+  await expect.element(name).toBeRequired();
+  await page.getByRole("button", { name: "Confirm booking" }).click();
+  await expect.element(name).toHaveAttribute("aria-invalid", "true");
+  await expect.element(name).toHaveAccessibleDescription("Name is required.");
+  await expect.element(name).toHaveFocus();
+});
+
 test("shows a server error when the slot was taken", async () => {
   const submit = vi.fn(async (): Promise<ActionResult<BookingDetail>> => ({
     ok: false,

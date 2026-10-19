@@ -63,10 +63,12 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Darker than the shadcn default so destructive text on its own tint reaches 4.5:1. */
+  --destructive: oklch(0.505 0.213 27.518);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Input borders, switch tracks, and the focus ring need 3:1 against the surface (WCAG 1.4.11). */
+  --input: oklch(0.62 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -98,10 +100,10 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.808 0.114 19.571);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(0.55 0 0);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -119,13 +121,20 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
+    /* Keeps focused and scrolled-to elements clear of the sticky header (WCAG 2.4.11). */
+    scroll-padding-top: 7rem;
+  }
+  @media (min-width: 48rem) {
+    html {
+      scroll-padding-top: 5rem;
+    }
   }
 }
 :root {

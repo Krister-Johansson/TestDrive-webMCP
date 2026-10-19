@@ -48,12 +48,14 @@ export function placeholderPalette(id: string): PlaceholderPalette {
   const ink = "#111418";
   let background = hslToHex(hue, saturation, lightness);
   let text = contrastRatio(white, background) >= contrastRatio(ink, background) ? white : ink;
-  // Yellow-green hues around mid lightness can miss AA for both; darken until white passes.
-  while (contrastRatio(text, background) < 4.5 && lightness > 10) {
+  let accent = hslToHex((hue + 18) % 360, saturation, Math.min(lightness + 14, 62));
+  // The text sits on a gradient from background to accent, so it must pass on both ends.
+  // Yellow-green hues and the lighter accent can miss AA; darken until white passes on both.
+  while ((contrastRatio(text, background) < 4.5 || contrastRatio(text, accent) < 4.5) && lightness > 10) {
     lightness -= 3;
     background = hslToHex(hue, saturation, lightness);
+    accent = hslToHex((hue + 18) % 360, saturation, Math.min(lightness + 14, 62));
     text = white;
   }
-  const accent = hslToHex((hue + 18) % 360, saturation, Math.min(lightness + 14, 62));
   return { hue, background, accent, text };
 }

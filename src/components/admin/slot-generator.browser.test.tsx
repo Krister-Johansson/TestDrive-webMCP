@@ -9,6 +9,16 @@ const cars = [
   { id: "c3", brand: "Old", model: "Timer", active: false },
 ];
 
+test("keeps the result status region mounted, so the first result is announced", async () => {
+  const onSubmit = vi.fn(async () => ({ ok: true as const, data: { count: 10 } }));
+  const screen = await render(<SlotGenerator cars={cars} onSubmit={onSubmit} />);
+  const status = screen.getByRole("status");
+  await expect.element(status).toBeInTheDocument();
+  await expect.element(status).toHaveTextContent("");
+  await screen.getByRole("button", { name: "Generate slots" }).click();
+  await expect.element(status).toHaveTextContent("10 slots added.");
+});
+
 test("previews how many slots will be created and submits", async () => {
   const onSubmit = vi.fn(async () => ({ ok: true as const, data: { count: 8 } }));
   const screen = await render(<SlotGenerator cars={cars} onSubmit={onSubmit} />);

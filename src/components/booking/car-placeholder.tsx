@@ -40,13 +40,13 @@ export function CarPlaceholder({ car, className }: { car: Car; className?: strin
         <circle cx="48" cy="68" r="10" />
         <circle cx="136" cy="68" r="10" />
       </g>
-      <text x="22" y="44" fill={palette.text} fontSize="13" fontWeight="600" letterSpacing="2" opacity="0.8">
+      <text x="22" y="44" fill={palette.text} fontSize="13" fontWeight="600" letterSpacing="2">
         {car.brand.toUpperCase()}
       </text>
       <text x="22" y="82" fill={palette.text} fontSize="36" fontWeight="700" letterSpacing="-1">
         {car.model}
       </text>
-      <text x="22" y="176" fill={palette.text} fontSize="12" fontWeight="500" opacity="0.8">
+      <text x="22" y="176" fill={palette.text} fontSize="12" fontWeight="500">
         {ENUM_LABELS.bodyType[car.bodyType]} · {car.color}
       </text>
     </svg>

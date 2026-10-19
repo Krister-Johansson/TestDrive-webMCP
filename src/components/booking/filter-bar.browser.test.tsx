@@ -40,6 +40,14 @@ test("renders every filter section", async () => {
   await expect.element(screen.getByRole("textbox", { name: "Feature" })).toBeVisible();
 });
 
+test("every button in the panel has an accessible name, including the combobox clear buttons", async () => {
+  const screen = await render(panel({ brand: "Norra" }, () => {}));
+  await expect.element(screen.getByRole("combobox", { name: "Brand" })).toHaveValue("Norra");
+  for (const button of [...screen.container.querySelectorAll("button")].filter((b) => b.checkVisibility())) {
+    expect(button, button.outerHTML.slice(0, 200)).toHaveAccessibleName();
+  }
+});
+
 test("changing a control reports the merged filter object", async () => {
   const onChange = vi.fn();
   const screen = await render(panel({ bodyType: "suv" }, onChange));

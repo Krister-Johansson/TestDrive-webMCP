@@ -281,7 +281,7 @@ export function FilterSummary({ className }: { className?: string }) {
   const active = CAR_FILTER_KEYS.filter((key) => filters[key] !== undefined);
   return (
     <div className={cn("flex min-h-9 flex-wrap items-center gap-2", className)}>
-      <span className="text-sm font-medium tabular-nums" aria-live="polite">
+      <span role="status" className="text-sm font-medium tabular-nums">
         {resultCount} {resultCount === 1 ? "car" : "cars"}
       </span>
       {active.length > 0 ? <span className="text-muted-foreground">·</span> : null}

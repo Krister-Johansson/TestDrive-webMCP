@@ -24,12 +24,15 @@ export function BrandModelPicker({
   onChange,
   id,
   placeholder = "Search brand or model",
+  errorId,
 }: {
   brands: BrandTree[];
   value: BrandModelValue | null;
   onChange: (value: BrandModelValue | null) => void;
   id?: string;
   placeholder?: string;
+  /** Id of the error message; marks the input invalid and describes it. */
+  errorId?: string;
 }) {
   const groups: PickerGroup[] = brands.map((brand) => ({
     value: brand.name,
@@ -52,7 +55,15 @@ export function BrandModelPicker({
       itemToStringValue={(item) => item.value}
       isItemEqualToValue={(a, b) => a.value === b.value}
     >
-      <ComboboxInput id={id} aria-label="Brand and model" placeholder={placeholder} showClear className="w-full" />
+      <ComboboxInput
+        id={id}
+        aria-label="Brand and model"
+        aria-invalid={errorId ? true : undefined}
+        aria-describedby={errorId}
+        placeholder={placeholder}
+        showClear
+        className="w-full"
+      />
       <ComboboxContent>
         <ComboboxEmpty>No brand or model matches.</ComboboxEmpty>
         <ComboboxList>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, CircleHelp, Copy, Wrench } from "lucide-react";
+import { CircleHelp, Wrench } from "lucide-react";
+import { CopyButton } from "@/components/connect/copy-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +61,7 @@ function SupportBadge() {
     state: { support },
   } = useWebMcp();
   if (support === "unknown") return <Badge variant="outline">Checking…</Badge>;
-  if (support === "native") return <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">Native</Badge>;
+  if (support === "native") return <Badge className="bg-emerald-700 text-white hover:bg-emerald-700">Native</Badge>;
   return <Badge variant="secondary">Unavailable</Badge>;
 }
 
@@ -69,18 +69,6 @@ export function HelpDialog() {
   const {
     state: { support },
   } = useWebMcp();
-  const [copied, setCopied] = useState(false);
-
-  async function copyFlag() {
-    try {
-      await navigator.clipboard.writeText(WEBMCP_FLAG_URL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      setCopied(false);
-    }
-  }
-
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="ghost" size="icon-sm" aria-label="How to enable WebMCP" />}>
@@ -103,10 +91,7 @@ export function HelpDialog() {
             Open this address in a new tab. Pages cannot open chrome:// links, so copy it:
             <div className="mt-1.5 flex items-center gap-2">
               <code className="flex-1 rounded bg-muted px-2 py-1 text-xs">{WEBMCP_FLAG_URL}</code>
-              <Button size="sm" variant="outline" onClick={copyFlag}>
-                {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                {copied ? "Copied" : "Copy"}
-              </Button>
+              <CopyButton text={WEBMCP_FLAG_URL} />
             </div>
           </li>
           <li>Set the flag to Enabled and relaunch Chrome.</li>

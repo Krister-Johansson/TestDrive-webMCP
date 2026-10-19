@@ -1,10 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
+import type { Modifiers } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { parseLocalDay, toLocalDay } from "@/lib/booking-service";
 import { cn } from "@/lib/utils";
 import type { DaySummary } from "./day-summary";
+
+/**
+ * "Thursday, October 1, 2026" rather than the default "October 1st": the visible "1" must be
+ * part of the name (WCAG 2.5.3). Fully booked days say so, since the strike-through is visual only.
+ */
+function labelDayButton(date: Date, modifiers: Modifiers): string {
+  let label = format(date, "EEEE, MMMM d, yyyy");
+  if (modifiers.today) label = `Today, ${label}`;
+  if (modifiers.full) label = `${label}, fully booked`;
+  if (modifiers.selected) label = `${label}, selected`;
+  return label;
+}
 
 export type SlotCalendarViewProps = {
   days: DaySummary[];
@@ -42,6 +56,7 @@ export function SlotCalendarView({ days, selected, onSelectDay, className }: Slo
         return !day || (day.available === 0 && toLocalDay(date) !== selected);
       }}
       modifiers={{ full: fullDays }}
+      labels={{ labelDayButton }}
       modifiersClassNames={{ full: "[&>button]:line-through [&>button]:text-muted-foreground" }}
       className={cn("rounded-xl border bg-card [--cell-size:--spacing(9)]", className)}
     />
