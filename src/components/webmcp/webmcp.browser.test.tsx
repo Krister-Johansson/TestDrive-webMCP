@@ -37,7 +37,7 @@ beforeEach(() => {
   resetBookingUi();
 });
 
-test("the toggle registers the global tools and unregisters them again", async () => {
+test("global tools register as soon as the browser has WebMCP, with no toggle", async () => {
   await render(
     <WebMcpProvider>
       <WebMcpControls />
@@ -45,12 +45,7 @@ test("the toggle registers the global tools and unregisters them again", async (
     </WebMcpProvider>,
   );
   await expect.element(page.getByText("Native")).toBeVisible();
-  const toggle = page.getByRole("switch", { name: "WebMCP" });
-  await expect.element(toggle).not.toBeChecked();
-  expect(toolNames()).toEqual([]);
-
-  await toggle.click();
-  await expect.element(toggle).toBeChecked();
+  expect(page.getByRole("switch").elements()).toHaveLength(0);
   await expect.element(page.getByText("5 tools")).toBeVisible();
   expect(toolNames()).toEqual(["book_test_drive", "cancel_booking", "find_cars", "get_booking", "list_available_slots"]);
 
@@ -59,17 +54,13 @@ test("the toggle registers the global tools and unregisters them again", async (
   expect(actions.createBooking).toHaveBeenCalledWith({ slotId: "slot1", customerName: "Ada", customerEmail: undefined, note: undefined });
   expect(text).toContain("bk1");
   expect(text.length).toBeLessThanOrEqual(1500);
-
-  await toggle.click();
-  await expect.element(toggle).not.toBeChecked();
-  expect(toolNames()).toEqual([]);
 });
 
 test("page tools register only while their page is mounted", async () => {
   const applyFilters = vi.fn(async () => 2);
   const openCar = vi.fn(async () => "Opened Norra Fjell");
   const screen = await render(
-    <WebMcpProvider defaultEnabled>
+    <WebMcpProvider>
       <HomeToolset applyFilters={applyFilters} openCar={openCar} />
     </WebMcpProvider>,
   );
@@ -82,7 +73,7 @@ test("page tools register only while their page is mounted", async () => {
   await vi.waitFor(() => expect(toolNames()).toEqual([]));
 
   await render(
-    <WebMcpProvider defaultEnabled>
+    <WebMcpProvider>
       <BookToolset car={car} slots={[{ ...slot, booking: null, past: false }]} />
     </WebMcpProvider>,
   );
@@ -94,7 +85,7 @@ test("page tools register only while their page is mounted", async () => {
   expect(missing.isError).toBe(true);
 });
 
-test("without document.modelContext the toggle is disabled and help explains the flag", async () => {
+test("without document.modelContext nothing registers and help explains the flag", async () => {
   const saved = document.modelContext;
   Object.defineProperty(document, "modelContext", { value: undefined, configurable: true, writable: true });
   try {
@@ -104,10 +95,8 @@ test("without document.modelContext the toggle is disabled and help explains the
       </WebMcpProvider>,
     );
     await expect.element(page.getByText("Unavailable")).toBeVisible();
-    const toggle = page.getByRole("switch", { name: "WebMCP" }).element();
-    const disabled =
-      toggle.hasAttribute("disabled") || toggle.getAttribute("aria-disabled") === "true" || toggle.hasAttribute("data-disabled");
-    expect(disabled, toggle.outerHTML).toBe(true);
+    expect(page.getByRole("switch").elements()).toHaveLength(0);
+    expect(page.getByText(/\d+ tools?$/).elements()).toHaveLength(0);
     await page.getByRole("button", { name: "How to enable WebMCP" }).click();
     const dialog = page.getByRole("dialog");
     await expect.element(dialog).toBeVisible();

@@ -12,33 +12,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
 import { TOOL_DEFS, type ToolName } from "@/lib/tool-defs";
 import { WEBMCP_FLAG_URL, WEBMCP_LINKS } from "@/lib/webmcp-links";
 import { useWebMcp } from "./provider";
 
-
 export function WebMcpControls() {
   const {
-    state: { support, enabled, active, registeredTools },
-    actions: { setEnabled },
+    state: { active, registeredTools },
   } = useWebMcp();
-  const unavailable = support === "unavailable";
 
   return (
     <div className="flex items-center gap-1.5 rounded-lg border px-2 py-1">
-      <Switch
-        id="webmcp-toggle"
-        checked={enabled}
-        disabled={unavailable}
-        onCheckedChange={(checked) => setEnabled(checked)}
-        aria-label="WebMCP"
-      />
-      <Label htmlFor="webmcp-toggle" className="cursor-pointer text-sm font-medium">
-        WebMCP
-      </Label>
+      <span className="pl-1 text-sm font-medium">WebMCP</span>
       <SupportBadge />
       {active ? (
         <Popover>
@@ -111,7 +97,7 @@ export function HelpDialog() {
         </DialogHeader>
         <ol className="list-decimal space-y-3 pl-5 text-sm">
           <li>
-            Use Chrome 149 or newer. Chrome 153 or newer also lets the page unregister tools cleanly, which the toggle relies on.
+            Use Chrome 149 or newer. Chrome 153 or newer also lets the page unregister tools cleanly, which page tools rely on when you navigate.
           </li>
           <li>
             Open this address in a new tab. Pages cannot open chrome:// links, so copy it:
@@ -124,7 +110,7 @@ export function HelpDialog() {
             </div>
           </li>
           <li>Set the flag to Enabled and relaunch Chrome.</li>
-          <li>Reload this page. The badge in the header turns to Native and the toggle becomes active.</li>
+          <li>Reload this page. The badge in the header turns to Native and the page registers its tools.</li>
         </ol>
         <div className="space-y-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
           <p>
