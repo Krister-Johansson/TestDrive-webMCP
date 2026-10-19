@@ -221,7 +221,7 @@ export function FilterPanel() {
         <Section title="Equipment">
           {options.towHitch || filters.towHitch !== undefined ? (
             <div className="flex h-8 items-center gap-2">
-              <Switch id={`${id}-tow`} checked={filters.towHitch === true} onCheckedChange={(checked) => set("towHitch", checked ? true : undefined)} />
+              <Switch id={`${id}-tow`} aria-label="Tow hitch" checked={filters.towHitch === true} onCheckedChange={(checked) => set("towHitch", checked ? true : undefined)} />
               <Label htmlFor={`${id}-tow`} className="text-sm">
                 Tow hitch
               </Label>

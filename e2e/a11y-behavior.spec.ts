@@ -141,8 +141,13 @@ test("2.4.7 and 1.4.11 the focus indicator is visible with 3:1 contrast, in both
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       for (let i = 0; i < 30; i++) {
         await page.keyboard.press("Tab");
-        // Buttons transition their ring in; measure the end state.
-        await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== "running"));
+        // Buttons transition their ring in; measure the end state. Endless animations (spinners,
+        // the connecting dot) never finish, so only wait for finite ones.
+        await page.waitForFunction(() =>
+          document
+            .getAnimations()
+            .every((animation) => animation.playState !== "running" || animation.effect?.getComputedTiming().endTime === Infinity),
+        );
         const result = await page.evaluate(measureFocusIndicator);
         expect(result.ratio, `${scheme} ${path}: ${result.element}`).toBeGreaterThanOrEqual(3);
       }

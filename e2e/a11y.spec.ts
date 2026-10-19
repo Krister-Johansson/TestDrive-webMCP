@@ -48,12 +48,14 @@ for (const theme of ["light", "dark"] as const) {
       // stays in the input; Tab closes the list first (covered in a11y-behavior.spec.ts).
       await expectAccessible(page, "/ brand combobox open", ["aria-hidden-focus"]);
       await page.keyboard.press("Escape");
+      await expect(page.getByRole("listbox")).toHaveCount(0);
 
       await page.getByRole("combobox", { name: "Seats" }).click();
       await expect(page.getByRole("listbox")).toBeVisible();
       // The open list covers part of a filter pill underneath; that pill cannot be used until the list closes.
       await expectAccessible(page, "/ seats select open", ["target-size"]);
       await page.keyboard.press("Escape");
+      await expect(page.getByRole("listbox")).toHaveCount(0);
 
       await page.getByRole("button", { name: "How to enable WebMCP" }).click();
       await expect(page.getByRole("dialog", { name: "Enable WebMCP in Chrome" })).toBeVisible();
